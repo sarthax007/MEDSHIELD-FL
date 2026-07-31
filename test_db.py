@@ -2,6 +2,7 @@ import os
 from dotenv import load_dotenv
 from sqlalchemy import create_engine, text
 
+
 def test_connection():
     load_dotenv()
     db_url = os.getenv("DATABASE_URL_SYNC")
@@ -16,6 +17,7 @@ def test_connection():
             print(f"Connection successful! Query returned: {result.scalar()}")
     except Exception as e:
         print(f"Connection failed: {e}")
+
 
 if __name__ == "__main__":
     test_connection()

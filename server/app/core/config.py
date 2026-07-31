@@ -1,25 +1,26 @@
 from typing import List, Union
-from pydantic import AnyHttpUrl, validator, field_validator
+from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
 
 class Settings(BaseSettings):
     DATABASE_URL: str
     DATABASE_URL_SYNC: str
-    
+
     SECRET_KEY: str
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
-    
+
     FL_SERVER_HOST: str = "localhost"
     FL_SERVER_PORT: int = 8080
     FL_NUM_ROUNDS: int = 10
     FL_MIN_CLIENTS: int = 2
-    
+
     HE_POLY_MOD_DEGREE: int = 8192
     HE_COEFF_MOD_BIT_SIZES: str = "60,40,40,60"
     HE_SCALE: float = 2**40
     HE_SECRET_CONTEXT_PATH: str = "./keys/secret.ctx"
     HE_PUBLIC_CONTEXT_PATH: str = "./keys/public.ctx"
-    
+
     ENVIRONMENT: str = "development"
     LOG_LEVEL: str = "INFO"
     CORS_ORIGINS: Union[str, List[str]] = []
@@ -52,6 +53,7 @@ class Settings(BaseSettings):
 
     @property
     def parsed_he_coeff_mod_bit_sizes(self) -> List[int]:
-        return [int(x.strip()) for x in self.HE_COEFF_MOD_BIT_SIZES.split(',')]
+        return [int(x.strip()) for x in self.HE_COEFF_MOD_BIT_SIZES.split(",")]
+
 
 settings = Settings()
