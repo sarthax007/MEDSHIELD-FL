@@ -13,6 +13,45 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U medshield"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: .
+      dockerfile: server/Dockerfile
+    container_name: medshield_backend
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql+asyncpg://medshield:changeme@db:5432/medshield_db
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    container_name: medshield_frontend
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_URL=http://localhost:8000
+    restart: unless-stopped
+
+  fl_server:
+    build:
+      context: .
+      dockerfile: fl/Dockerfile
+    container_name: medshield_fl_server
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
 
 volumes:
   postgres_data:

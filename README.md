@@ -54,7 +54,7 @@ This repository is built task by task against
 [`MedShieldFL_100_Tasks_Build_Guide.pdf`](MedShieldFL_100_Tasks_Build_Guide.pdf) —
 100 tasks across 10 levels, each with explicit acceptance criteria.
 
-**Current status: Task 3 complete** — frontend scaffolding complete.
+**Current status: Task 10 complete** — dataset download and verification script ready.
 
 Setup instructions land in [`CONTRIBUTING.md`](CONTRIBUTING.md) and are filled in as the
 corresponding tasks complete:

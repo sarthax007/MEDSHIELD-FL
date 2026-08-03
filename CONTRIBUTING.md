@@ -83,7 +83,7 @@ npm run dev
    ordered by dependency, and skipping ahead breaks the runnable-at-every-step property.
 4. Verify each acceptance criterion yourself before opening a PR.
 5. Open a PR whose description lists the acceptance criteria as a checklist, ticked.
-6. Merge only when CI is green (*CI pending Task 8*).
+6. Merge only when CI is green.
 
 Commit after each task. One task, one commit — it keeps the history aligned with the
 build guide and makes a broken step easy to isolate.
