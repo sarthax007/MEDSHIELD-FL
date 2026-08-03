@@ -30,7 +30,7 @@ classifiers = [
 # that `pip install -e shared/` works in isolation (e.g. in CI matrix jobs
 # that only test the shared library).
 dependencies = [
-  "numpy>=1.26.0,<2.0",
+  "numpy>=1.26.0",
   "torch>=2.2.0,<3.0",
   "timm>=0.9.16,<2.0",
   "tenseal>=0.3.14,<1.0",
