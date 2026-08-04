@@ -1,0 +1,6 @@
+filename,patient_id,slice_idx,has_tumor,tumor_pixels
+1_slice1.npy,1,1,True,100
+1_slice2.npy,1,2,False,0
+2_slice1.npy,2,1,False,0
+3_slice1.npy,3,1,True,50
+3_slice2.npy,3,2,True,20
