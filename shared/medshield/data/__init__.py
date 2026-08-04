@@ -7,6 +7,8 @@ from .loader import MRIVolume, VolumeLoadError, load_patient, load_volume
 from .partitioning import partition_by_patient
 from .preprocess import preprocess_slice
 from .slicer import SliceExtractor, SliceStrategy
+from .splitting import create_hospital_splits, process_all_clients
+from .validate import generate_report, validate_hospital_splits
 
 __all__ = [
     "MRIVolume",
@@ -25,4 +27,8 @@ __all__ = [
     "partition_by_patient",
     "BraTS2DSliceDataset",
     "create_dataloaders",
+    "create_hospital_splits",
+    "process_all_clients",
+    "validate_hospital_splits",
+    "generate_report",
 ]
