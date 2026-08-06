@@ -21,6 +21,7 @@ class ModelConfig:
     learning_rate: float = 1e-4
     weight_decay: float = 1e-4
     epochs: int = 10
+    mixed_precision: bool = False
 
     def to_dict(self) -> dict:
         """Serialize config to dictionary."""
