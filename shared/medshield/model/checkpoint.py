@@ -5,7 +5,7 @@ Task 28 \u2014 Implement checkpointing.
 
 import logging
 from pathlib import Path
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, Optional
 
 import torch
 import torch.nn as nn
@@ -46,7 +46,7 @@ def save_checkpoint(
     path = Path(filepath)
     path.parent.mkdir(parents=True, exist_ok=True)
 
-    checkpoint: Dict[str, Any] = {
+    checkpoint: dict[str, Any] = {
         "model_state_dict": model.state_dict(),
         "epoch": epoch,
         "val_loss": val_loss,
@@ -67,7 +67,7 @@ def load_checkpoint(
     model: nn.Module,
     optimizer: Optional[torch.optim.Optimizer] = None,
     scheduler: Optional[Any] = None,
-) -> Tuple[ModelConfig, int, float]:
+) -> tuple[ModelConfig, int, float]:
     """Load a model checkpoint.
 
     Parameters

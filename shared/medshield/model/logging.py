@@ -6,7 +6,7 @@ Task 29 - Implement experiment logging.
 import json
 import logging
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
 from .config import ModelConfig
 
@@ -32,7 +32,9 @@ class ExperimentLogger:
         self.hyperparameters_file = self.run_dir / "hyperparameters.json"
         logger.info(f"Initialized ExperimentLogger at {self.run_dir}")
 
-    def log_hyperparameters(self, config: ModelConfig, extra: Optional[Dict[str, Any]] = None) -> None:
+    def log_hyperparameters(
+        self, config: ModelConfig, extra: Optional[dict[str, Any]] = None
+    ) -> None:
         """Log the model configuration and any extra hyperparameters.
 
         Parameters
@@ -50,7 +52,7 @@ class ExperimentLogger:
             json.dump(params, f, indent=4)
         logger.info(f"Logged hyperparameters to {self.hyperparameters_file}")
 
-    def log_metrics(self, epoch: int, metrics: Dict[str, Any]) -> None:
+    def log_metrics(self, epoch: int, metrics: dict[str, Any]) -> None:
         """Log metrics for a specific epoch.
 
         Parameters

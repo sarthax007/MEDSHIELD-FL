@@ -59,7 +59,7 @@ def get_eval_transforms() -> transforms.Compose:
     transforms.Compose
         An empty transform pipeline.
     """
-    return transforms.Compose([])
+    return transforms.Compose([transforms.Identity()])
 
 
 def visualize_augmentations(
