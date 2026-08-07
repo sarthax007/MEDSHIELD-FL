@@ -23,7 +23,7 @@ import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
 
-from medshield.data.dataset import BraTS2DSliceDataset, create_dataloaders
+from medshield.data.dataset import create_dataloaders
 from medshield.data.labels import confirm_mapping
 from medshield.data.partitioning import partition_by_patient
 from medshield.data.splitting import create_hospital_splits
@@ -78,6 +78,7 @@ def seed_everything(seed: int = SEED) -> None:
 # Synthetic data generation
 # ---------------------------------------------------------------------------
 
+
 def generate_synthetic_data(
     data_dir: Path,
     num_patients: int = 30,
@@ -124,9 +125,7 @@ def generate_synthetic_data(
             filename = f"{patient_idx}_slice{slice_idx}.npy"
 
             # Create base brain-like image (smooth Gaussian blob)
-            slice_data = np.zeros(
-                (num_channels, image_shape[0], image_shape[1]), dtype=np.float32
-            )
+            slice_data = np.zeros((num_channels, image_shape[0], image_shape[1]), dtype=np.float32)
 
             for ch in range(num_channels):
                 # Each channel gets slightly different intensity patterns
@@ -154,8 +153,9 @@ def generate_synthetic_data(
                     -image_shape[0] // 2 : image_shape[0] // 2,
                     -image_shape[1] // 2 : image_shape[1] // 2,
                 ]
-                tumor_mask = ((yy - ty + image_shape[0] // 2) ** 2 +
-                              (xx - tx + image_shape[1] // 2) ** 2) < tr ** 2
+                tumor_mask = (
+                    (yy - ty + image_shape[0] // 2) ** 2 + (xx - tx + image_shape[1] // 2) ** 2
+                ) < tr**2
                 tumor_pixels = int(tumor_mask.sum())
                 for ch in range(num_channels):
                     slice_data[ch][tumor_mask] += 300.0 + ch * 50.0
@@ -188,6 +188,7 @@ def generate_synthetic_data(
 # ---------------------------------------------------------------------------
 # Evaluation helper
 # ---------------------------------------------------------------------------
+
 
 def evaluate_model(
     model: nn.Module,
@@ -258,6 +259,7 @@ def evaluate_model(
 # Report generation
 # ---------------------------------------------------------------------------
 
+
 def generate_results_report(
     results: dict[str, Any],
     config: ModelConfig,
@@ -312,7 +314,6 @@ def generate_results_report(
     for k, v in cfg.items():
         lines.append(f"| {k} | `{v}` |")
 
-
     def _fmt(val: Any, fmt: str = ".4f") -> str:
         """Format a numeric value safely, returning 'N/A' for missing values."""
         if val is None or val == "N/A":
@@ -337,7 +338,6 @@ def generate_results_report(
         f"| Samples | {home.get('num_samples', 'N/A')} |",
         "",
     ]
-
 
     if home.get("confusion_matrix"):
         lines += [
@@ -386,8 +386,8 @@ def generate_results_report(
         "## Reproducibility",
         "",
         f"- **Seed**: `{seed_val}`",
-        f"- **Config file**: `data/checkpoints/baseline/baseline_config.json`",
-        f"- **Checkpoint**: `data/checkpoints/baseline/baseline_best_model.pt`",
+        "- **Config file**: `data/checkpoints/baseline/baseline_config.json`",
+        "- **Checkpoint**: `data/checkpoints/baseline/baseline_best_model.pt`",
         "",
         "To reproduce, run:",
         "",
@@ -406,6 +406,7 @@ def generate_results_report(
 # ---------------------------------------------------------------------------
 # Main entry point
 # ---------------------------------------------------------------------------
+
 
 def run_baseline(
     *,
@@ -478,13 +479,13 @@ def run_baseline(
 
     # 4. Split Hospital 0 into train/val/test
     logger.info("Step 3/8: Creating train/val/test splits for Hospital 0...")
-    train_df, val_df, test_df = create_hospital_splits(
-        client_dfs[0], seed=seed
-    )
+    train_df, val_df, test_df = create_hospital_splits(client_dfs[0], seed=seed)
 
     logger.info(
         "Hospital 0 splits — Train: %d, Val: %d, Test: %d",
-        len(train_df), len(val_df), len(test_df),
+        len(train_df),
+        len(val_df),
+        len(test_df),
     )
 
     # Get class counts for the training set
@@ -586,9 +587,7 @@ def run_baseline(
         hosp_name = f"Hospital {hosp_idx}"
 
         # Split this hospital's data
-        _, _, other_test_df = create_hospital_splits(
-            client_dfs[hosp_idx], seed=seed
-        )
+        _, _, other_test_df = create_hospital_splits(client_dfs[hosp_idx], seed=seed)
 
         if len(other_test_df) == 0:
             logger.warning("Hospital %d has no test data, skipping.", hosp_idx)

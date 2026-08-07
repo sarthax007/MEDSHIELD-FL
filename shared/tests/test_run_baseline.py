@@ -4,21 +4,20 @@ Task 31 — Tests for run_baseline.
 """
 
 import json
-import shutil
 from pathlib import Path
 
 import numpy as np
 import pytest
 import torch
 
+from medshield.model.config import ModelConfig
+from medshield.model.loss import get_loss_function
 from medshield.model.run_baseline import (
     evaluate_model,
     generate_results_report,
     generate_synthetic_data,
     seed_everything,
 )
-from medshield.model.config import ModelConfig
-from medshield.model.loss import get_loss_function
 
 
 @pytest.fixture()
@@ -139,9 +138,7 @@ class TestEvaluateModel:
         loss_fn = get_loss_function()
         device = torch.device("cpu")
 
-        dataset = torch.utils.data.TensorDataset(
-            torch.randn(0, 10), torch.randint(0, 2, (0,))
-        )
+        dataset = torch.utils.data.TensorDataset(torch.randn(0, 10), torch.randint(0, 2, (0,)))
         loader = torch.utils.data.DataLoader(dataset, batch_size=1)
 
         metrics = evaluate_model(model, loader, loss_fn, device)

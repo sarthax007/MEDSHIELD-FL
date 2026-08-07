@@ -10,6 +10,13 @@ from .loss import get_loss_function
 from .metrics import compute_metrics
 from .optimizer import get_optimizer, get_scheduler
 from .registry import create_model
+from .serialization import (
+    get_serialization_layout,
+    model_to_vector,
+    state_dict_to_vector,
+    vector_to_model,
+    vector_to_state_dict,
+)
 from .train import get_device, train_model
 from .vit import TumorClassifier, create_vit_backbone
 
@@ -27,4 +34,9 @@ __all__ = [
     "save_checkpoint",
     "load_checkpoint",
     "ExperimentLogger",
+    "model_to_vector",
+    "vector_to_model",
+    "state_dict_to_vector",
+    "vector_to_state_dict",
+    "get_serialization_layout",
 ]
