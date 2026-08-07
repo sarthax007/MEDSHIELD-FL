@@ -1,8 +1,16 @@
 """Model weights serialization and deserialization utilities.
 
+Task 32 — Serialize / deserialize model weights as a flat vector.
+Task 33 — Identify critical parameters for selective encryption.
+
 Provides functions to convert a model's state_dict to and from a flat 1D
 vector. It guarantees deterministic ordering by sorting the parameter keys,
 which ensures consistent indexing across all federated clients.
+
+Also provides selective extraction of **critical parameters** — those most
+relevant to the classification decision (``cls_token`` and ``head``) — for
+targeted homomorphic encryption.  Only ~0.003 % of the total ViT-Base/16
+parameters are critical, making full HE on just these weights feasible.
 """
 
 from __future__ import annotations
@@ -14,6 +22,39 @@ import torch
 import torch.nn as nn
 
 logger = logging.getLogger(__name__)
+
+# ---------------------------------------------------------------------------
+# Critical-parameter identification
+# ---------------------------------------------------------------------------
+
+#: Substrings used to identify classification-critical state_dict keys.
+#: ``cls_token``  — the learnable [CLS] embedding that aggregates image info.
+#: ``head``       — the final linear classifier (weight + bias).
+CRITICAL_KEY_PATTERNS: tuple[str, ...] = ("cls_token", "head")
+
+
+def is_critical_parameter(name: str) -> bool:
+    """Return True if *name* belongs to a classification-critical parameter.
+
+    A parameter is deemed critical if its key contains any substring listed
+    in :data:`CRITICAL_KEY_PATTERNS` (currently ``cls_token`` and ``head``).
+
+    Parameters
+    ----------
+    name : str
+        The state_dict key to check.
+
+    Returns
+    -------
+    bool
+        ``True`` if the key matches a critical pattern.
+    """
+    return any(pattern in name for pattern in CRITICAL_KEY_PATTERNS)
+
+
+# ---------------------------------------------------------------------------
+# Full-model serialization (Task 32)
+# ---------------------------------------------------------------------------
 
 
 def state_dict_to_vector(state_dict: dict[str, torch.Tensor]) -> torch.Tensor:
@@ -168,3 +209,156 @@ def get_serialization_layout(state_dict: dict[str, torch.Tensor]) -> list[dict[s
             current_offset += numel
 
     return layout
+
+
+# ---------------------------------------------------------------------------
+# Selective (critical-only) serialization  (Task 33)
+# ---------------------------------------------------------------------------
+
+
+def state_dict_to_critical_vector(
+    state_dict: dict[str, torch.Tensor],
+) -> torch.Tensor:
+    """Extract only the critical parameters and flatten them into a 1-D tensor.
+
+    Critical parameters are identified by :func:`is_critical_parameter`.
+    Keys are sorted alphabetically for deterministic ordering.
+
+    For the default ViT-Base/16 + TumorClassifier architecture the critical
+    keys are (in sorted order):
+
+    ============================================  =============  ======
+    Key                                           Shape          Numel
+    ============================================  =============  ======
+    ``backbone.cls_token``                        (1, 1, 768)      768
+    ``head.bias``                                 (2,)               2
+    ``head.weight``                               (2, 768)       1 536
+    ============================================  =============  ======
+
+    Total critical elements: **2 306** (≈ 0.003 % of 85 800 194).
+
+    Parameters
+    ----------
+    state_dict : dict[str, torch.Tensor]
+        The full state dictionary of the model.
+
+    Returns
+    -------
+    torch.Tensor
+        A flat 1-D CPU tensor containing only the critical weights.
+    """
+    critical_sd = {k: v for k, v in state_dict.items() if is_critical_parameter(k)}
+    return state_dict_to_vector(critical_sd)
+
+
+def critical_vector_to_state_dict(
+    vector: torch.Tensor,
+    template_state_dict: dict[str, torch.Tensor],
+) -> dict[str, torch.Tensor]:
+    """Merge a critical-parameter vector back into a full state_dict.
+
+    Non-critical parameters are copied unchanged from *template_state_dict*.
+    Critical parameters are restored from *vector* in sorted-key order.
+
+    Parameters
+    ----------
+    vector : torch.Tensor
+        Flat 1-D tensor of critical weights (same order produced by
+        :func:`state_dict_to_critical_vector`).
+    template_state_dict : dict[str, torch.Tensor]
+        The full state_dict supplying shapes for critical keys and values
+        for all non-critical keys.
+
+    Returns
+    -------
+    dict[str, torch.Tensor]
+        A complete state_dict with critical parameters replaced from
+        *vector* and all other parameters unchanged.
+
+    Raises
+    ------
+    ValueError
+        If *vector* length does not match the total critical-parameter count.
+    """
+    critical_template = {k: v for k, v in template_state_dict.items() if is_critical_parameter(k)}
+    restored_critical = vector_to_state_dict(vector, critical_template)
+
+    merged = {}
+    for key in template_state_dict:
+        if is_critical_parameter(key):
+            merged[key] = restored_critical[key]
+        else:
+            merged[key] = template_state_dict[key]
+
+    return merged
+
+
+def model_to_critical_vector(model: nn.Module) -> torch.Tensor:
+    """Extract critical parameters from a model as a flat 1-D tensor.
+
+    Parameters
+    ----------
+    model : nn.Module
+        The model whose critical weights are to be extracted.
+
+    Returns
+    -------
+    torch.Tensor
+        A flat 1-D CPU tensor of critical weights.
+    """
+    return state_dict_to_critical_vector(model.state_dict())
+
+
+def critical_vector_to_model(vector: torch.Tensor, model: nn.Module) -> None:
+    """Load a critical-parameter vector back into a model in-place.
+
+    Non-critical parameters remain unchanged.
+
+    Parameters
+    ----------
+    vector : torch.Tensor
+        The flat 1-D tensor of critical weights.
+    model : nn.Module
+        The model to update.
+    """
+    new_sd = critical_vector_to_state_dict(vector, model.state_dict())
+    model.load_state_dict(new_sd)
+
+
+def get_critical_ratio(model: nn.Module) -> float:
+    """Calculate the ratio of critical parameters to total model parameters.
+
+    Logs a human-readable summary to the module logger at INFO level.
+
+    Parameters
+    ----------
+    model : nn.Module
+        The model to inspect.
+
+    Returns
+    -------
+    float
+        Fraction of parameters that are critical (0.0 – 1.0).
+    """
+    sd = model.state_dict()
+    total_numel = 0
+    critical_numel = 0
+
+    for key, val in sd.items():
+        if isinstance(val, torch.Tensor):
+            numel = val.numel()
+            total_numel += numel
+            if is_critical_parameter(key):
+                critical_numel += numel
+
+    ratio = critical_numel / total_numel if total_numel > 0 else 0.0
+
+    logger.info(
+        "Critical-parameter ratio: %d / %d = %.6f%% (%d critical elements)",
+        critical_numel,
+        total_numel,
+        ratio * 100,
+        critical_numel,
+    )
+
+    return ratio

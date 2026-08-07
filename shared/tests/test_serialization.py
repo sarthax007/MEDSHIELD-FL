@@ -7,7 +7,6 @@ accurate layout offsets.
 
 from __future__ import annotations
 
-import pytest
 import torch
 
 from medshield.model.serialization import (
