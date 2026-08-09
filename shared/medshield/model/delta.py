@@ -62,9 +62,7 @@ def apply_delta(global_vector: torch.Tensor, delta: torch.Tensor) -> torch.Tenso
         The updated global vector.
     """
     if global_vector.shape != delta.shape:
-        raise ValueError(
-            f"Shape mismatch: global {global_vector.shape} != delta {delta.shape}"
-        )
+        raise ValueError(f"Shape mismatch: global {global_vector.shape} != delta {delta.shape}")
     return global_vector + delta
 
 

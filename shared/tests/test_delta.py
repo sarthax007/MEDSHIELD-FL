@@ -18,7 +18,6 @@ from medshield.model.delta import (
 from medshield.model.serialization import (
     model_to_critical_vector,
     model_to_vector,
-    vector_to_model,
 )
 from medshield.model.vit import TumorClassifier
 
@@ -86,12 +85,12 @@ def test_model_delta_critical_only() -> None:
     # Check if non-critical parameters are still equal to the original global model
     global_full_vec = model_to_vector(global_model)
     reconstructed_full_vec = model_to_vector(reconstructed_model)
-    
+
     # We can't just check the whole vector equality because critical params changed.
     # But we know delta was only applied to critical params.
     # To check non-critical, we can apply the inverse delta and check equality to global.
     inverse_delta = -delta
     apply_model_delta(reconstructed_model, inverse_delta, critical_only=True)
-    
+
     reverted_vec = model_to_vector(reconstructed_model)
     assert torch.allclose(global_full_vec, reverted_vec, atol=1e-5)

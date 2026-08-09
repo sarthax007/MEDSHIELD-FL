@@ -9,16 +9,13 @@ from __future__ import annotations
 import torch
 
 from medshield.model.serialization import (
-    CRITICAL_KEY_PATTERNS,
     critical_vector_to_model,
     critical_vector_to_state_dict,
     get_critical_ratio,
     is_critical_parameter,
     model_to_critical_vector,
-    state_dict_to_critical_vector,
 )
 from medshield.model.vit import TumorClassifier
-
 
 # ---------------------------------------------------------------------------
 # is_critical_parameter
@@ -55,9 +52,7 @@ def test_critical_vector_size_matches_expected() -> None:
     sd = model.state_dict()
 
     # Manually count expected critical elements
-    expected_numel = sum(
-        v.numel() for k, v in sd.items() if is_critical_parameter(k)
-    )
+    expected_numel = sum(v.numel() for k, v in sd.items() if is_critical_parameter(k))
 
     vec = model_to_critical_vector(model)
     assert vec.ndim == 1
@@ -87,9 +82,9 @@ def test_critical_round_trip_preserves_critical_params() -> None:
     # Check that critical params now match the original
     other_sd = other.state_dict()
     for key, orig_val in orig_sd.items():
-        assert torch.allclose(other_sd[key], orig_val, atol=1e-7), (
-            f"Critical parameter '{key}' was not restored correctly."
-        )
+        assert torch.allclose(
+            other_sd[key], orig_val, atol=1e-7
+        ), f"Critical parameter '{key}' was not restored correctly."
 
 
 def test_critical_round_trip_leaves_non_critical_unchanged() -> None:
@@ -111,9 +106,9 @@ def test_critical_round_trip_leaves_non_critical_unchanged() -> None:
 
     # Non-critical params must be identical
     for key, orig_val in orig_non_critical.items():
-        assert torch.equal(merged[key], orig_val), (
-            f"Non-critical parameter '{key}' was unexpectedly modified."
-        )
+        assert torch.equal(
+            merged[key], orig_val
+        ), f"Non-critical parameter '{key}' was unexpectedly modified."
 
 
 def test_critical_round_trip_predictions() -> None:
