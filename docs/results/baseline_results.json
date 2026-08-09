@@ -1,0 +1,112 @@
+{
+    "task": "Task 31 \u2014 Single-Hospital Baseline",
+    "timestamp": "2026-08-06T16:02:48.477342+00:00",
+    "seed": 42,
+    "training_duration_seconds": 94.34,
+    "config": {
+        "model_name": "vit_base_patch16_224",
+        "num_classes": 2,
+        "pretrained": true,
+        "input_size": 224,
+        "drop_rate": 0.1,
+        "learning_rate": 0.0001,
+        "weight_decay": 0.0001,
+        "epochs": 3,
+        "mixed_precision": false
+    },
+    "home_hospital": {
+        "accuracy": 1.0,
+        "precision_macro": 1.0,
+        "recall_macro": 1.0,
+        "f1_macro": 1.0,
+        "precision_per_class": [
+            1.0,
+            1.0
+        ],
+        "recall_per_class": [
+            1.0,
+            1.0
+        ],
+        "f1_per_class": [
+            1.0,
+            1.0
+        ],
+        "confusion_matrix": [
+            [
+                8,
+                0
+            ],
+            [
+                0,
+                12
+            ]
+        ],
+        "roc_auc": 1.0,
+        "test_loss": 0.0002664851606823504,
+        "num_samples": 20
+    },
+    "cross_hospital": {
+        "Hospital 1": {
+            "accuracy": 1.0,
+            "precision_macro": 1.0,
+            "recall_macro": 1.0,
+            "f1_macro": 1.0,
+            "precision_per_class": [
+                1.0,
+                1.0
+            ],
+            "recall_per_class": [
+                1.0,
+                1.0
+            ],
+            "f1_per_class": [
+                1.0,
+                1.0
+            ],
+            "confusion_matrix": [
+                [
+                    12,
+                    0
+                ],
+                [
+                    0,
+                    8
+                ]
+            ],
+            "roc_auc": 1.0,
+            "test_loss": 0.00037371330545283855,
+            "num_samples": 20
+        },
+        "Hospital 2": {
+            "accuracy": 1.0,
+            "precision_macro": 1.0,
+            "recall_macro": 1.0,
+            "f1_macro": 1.0,
+            "precision_per_class": [
+                1.0,
+                1.0
+            ],
+            "recall_per_class": [
+                1.0,
+                1.0
+            ],
+            "f1_per_class": [
+                1.0,
+                1.0
+            ],
+            "confusion_matrix": [
+                [
+                    11,
+                    0
+                ],
+                [
+                    0,
+                    4
+                ]
+            ],
+            "roc_auc": 1.0,
+            "test_loss": 0.0004240421190237006,
+            "num_samples": 15
+        }
+    }
+}
