@@ -325,6 +325,45 @@ def critical_vector_to_model(vector: torch.Tensor, model: nn.Module) -> None:
     model.load_state_dict(new_sd)
 
 
+def state_dict_to_non_critical_vector(
+    state_dict: dict[str, torch.Tensor],
+) -> torch.Tensor:
+    """Extract only the non-critical parameters and flatten them into a 1-D tensor."""
+    non_critical_sd = {k: v for k, v in state_dict.items() if not is_critical_parameter(k)}
+    return state_dict_to_vector(non_critical_sd)
+
+
+def non_critical_vector_to_state_dict(
+    vector: torch.Tensor,
+    template_state_dict: dict[str, torch.Tensor],
+) -> dict[str, torch.Tensor]:
+    """Merge a non-critical-parameter vector back into a full state_dict."""
+    non_critical_template = {
+        k: v for k, v in template_state_dict.items() if not is_critical_parameter(k)
+    }
+    restored_non_critical = vector_to_state_dict(vector, non_critical_template)
+
+    merged = {}
+    for key in template_state_dict:
+        if not is_critical_parameter(key):
+            merged[key] = restored_non_critical[key]
+        else:
+            merged[key] = template_state_dict[key]
+
+    return merged
+
+
+def model_to_non_critical_vector(model: nn.Module) -> torch.Tensor:
+    """Extract non-critical parameters from a model as a flat 1-D tensor."""
+    return state_dict_to_non_critical_vector(model.state_dict())
+
+
+def non_critical_vector_to_model(vector: torch.Tensor, model: nn.Module) -> None:
+    """Load a non-critical-parameter vector back into a model in-place."""
+    new_sd = non_critical_vector_to_state_dict(vector, model.state_dict())
+    model.load_state_dict(new_sd)
+
+
 def get_critical_ratio(model: nn.Module) -> float:
     """Calculate the ratio of critical parameters to total model parameters.
 

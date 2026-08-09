@@ -1,6 +1,7 @@
-import os
 from pathlib import Path
+
 import tenseal as ts
+
 from .context import create_ckks_context
 
 PUBLIC_CONTEXT_FILENAME = "public_context.bytes"
@@ -25,10 +26,9 @@ def generate_and_save_keys(storage_dir: Path | str) -> None:
 
     # 2. Save the full secret context (contains secret key)
     # We save this so the hospital can simply load it to decrypt.
-    secret_context_bytes = context.serialize(save_public_key=True,
-                                             save_secret_key=True,
-                                             save_galois_keys=True,
-                                             save_relin_keys=True)
+    secret_context_bytes = context.serialize(
+        save_public_key=True, save_secret_key=True, save_galois_keys=True, save_relin_keys=True
+    )
     with open(storage_dir / SECRET_CONTEXT_FILENAME, "wb") as f:
         f.write(secret_context_bytes)
 
@@ -36,10 +36,9 @@ def generate_and_save_keys(storage_dir: Path | str) -> None:
     context.make_context_public()
 
     # 4. Save the public context (lacks secret key)
-    public_context_bytes = context.serialize(save_public_key=True,
-                                             save_secret_key=False,
-                                             save_galois_keys=True,
-                                             save_relin_keys=True)
+    public_context_bytes = context.serialize(
+        save_public_key=True, save_secret_key=False, save_galois_keys=True, save_relin_keys=True
+    )
     with open(storage_dir / PUBLIC_CONTEXT_FILENAME, "wb") as f:
         f.write(public_context_bytes)
 
@@ -47,8 +46,8 @@ def generate_and_save_keys(storage_dir: Path | str) -> None:
 def load_public_context(storage_dir: Path | str) -> ts.Context:
     """
     Loads and returns the public CKKS context.
-    
-    This context can be used to ENCRYPT data, perform homomorphic operations, 
+
+    This context can be used to ENCRYPT data, perform homomorphic operations,
     but CANNOT decrypt. This is what the central server uses.
     """
     storage_dir = Path(storage_dir)
@@ -61,7 +60,7 @@ def load_public_context(storage_dir: Path | str) -> ts.Context:
 def load_secret_context(storage_dir: Path | str) -> ts.Context:
     """
     Loads and returns the full CKKS context including the secret key.
-    
+
     This returns a fully functional context capable of DECRYPTING.
     This function should ONLY be called within the hospital's secured environment.
     """
