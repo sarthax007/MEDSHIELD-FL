@@ -14,6 +14,6 @@ Deep learning models, and specifically Vision Transformers (ViTs), are inherentl
 
 The magnitude of the CKKS decryption noise ($< 10^{-3}$ worst-case) is orders of magnitude smaller than the standard variance in stochastic gradient descent (SGD) updates or the precision lost during quantization (e.g. FP32 $\rightarrow$ FP16 or INT8).
 
-As verified by `test_decryption_preserves_model_predictions`, performing a full round-trip (extract $\rightarrow$ encrypt $\rightarrow$ decrypt $\rightarrow$ load) on the critical parameters alters the final un-softmaxed output logits by less than $1 \times 10^{-3}$. Because classification relies on `argmax` across classes, this microscopic shift in raw logit value does not change the predicted tumor class or meaningfully impact the confidence score. 
+As verified by `test_decryption_preserves_model_predictions`, performing a full round-trip (extract $\rightarrow$ encrypt $\rightarrow$ decrypt $\rightarrow$ load) on the critical parameters alters the final un-softmaxed output logits by less than $1 \times 10^{-3}$. Because classification relies on `argmax` across classes, this microscopic shift in raw logit value does not change the predicted tumor class or meaningfully impact the confidence score.
 
 **Conclusion:** The mathematical privacy guarantees of CKKS are achieved with a negligible precision trade-off that has **no material impact** on the diagnostic accuracy of MedShield-FL.

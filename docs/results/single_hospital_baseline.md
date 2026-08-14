@@ -1,8 +1,8 @@
 # Single-Hospital Baseline Results
 
-**Date**: 2026-08-06T16:02:48.477342+00:00  
-**Seed**: 42  
-**Training duration**: 94.34s  
+**Date**: 2026-08-06T16:02:48.477342+00:00
+**Seed**: 42
+**Training duration**: 94.34s
 
 ## Model Configuration
 

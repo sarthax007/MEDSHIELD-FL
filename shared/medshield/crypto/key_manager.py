@@ -8,6 +8,24 @@ PUBLIC_CONTEXT_FILENAME = "public_context.bytes"
 SECRET_CONTEXT_FILENAME = "secret_context.bytes"
 
 
+class SecurityError(Exception):
+    """Raised when a security isolation rule is violated."""
+
+    pass
+
+
+def validate_outbound_context(context: ts.Context) -> None:
+    """
+    Ensures the given context does not contain a secret key.
+    This acts as a safeguard before sending any data to the server.
+    """
+    if context.has_secret_key():
+        raise SecurityError(
+            "SECURITY VIOLATION: Attempted to use or serialize a context containing "
+            "the secret key for an outbound operation. This compromises private-key isolation."
+        )
+
+
 def generate_and_save_keys(storage_dir: Path | str) -> None:
     """
     Generates a new CKKS context and saves the public context and secret context
