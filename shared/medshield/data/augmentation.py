@@ -103,7 +103,7 @@ def visualize_augmentations(
         img_min, img_max = img.min(), img.max()
         if img_max > img_min:
             img = (img - img_min) / (img_max - img_min)
-        return img
+        return np.asarray(img)
 
     # Original
     axes[0].imshow(tensor_to_img(tensor), cmap="gray", origin="lower")
