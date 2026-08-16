@@ -1,0 +1,26 @@
+ient's encrypted update before aggregating.
+☐  The aggregated result becomes the new global model for the next round.
+☐  A configurable number of rounds runs back-to-back without manual intervention.
+Task 53 — Implement client-side decryption of the global update
+Each client decrypts the returned aggregated model locally with its own secret key.
+Acceptance criteria (done when all are true):
+☐  After a round, the client decrypts the aggregated update and applies it to its local model.
+☐  Decryption uses only the client's local secret key.
+☐  The decrypted global model produces sensible predictions (no corruption).
+☐  A test confirms the applied global model differs from the pre-round model as expected.
+Task 54 — Handle sample-count weighting for FedAvg
+Ensure aggregation correctly weights hospitals by how much data they contributed.
+Acceptance criteria (done when all are true):
+☐  Each client reports its training sample count to the server each round.
+☐  The homomorphic weighted average uses these counts so larger hospitals count proportionally
+more.
+☐  A plaintext simulation confirms the encrypted weighted average matches the intended FedAvg
+formula.
+☐  Edge cases (a hospital with zero new samples) are handled without breaking a round.
+Task 55 — Run a multi-client simulation
+Simulate three or more hospitals training together against the server.
+Acceptance criteria (done when all are true):
+☐  >=3 hospital clients participate in the same federated run using their non-IID partitions.
+☐  All clients complete each round and the server aggregates all of their updates.
+☐  The run is reproducible from configuration and seeds.
+☐  Per-client and global metrics are logged for every

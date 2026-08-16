@@ -13,7 +13,7 @@ import tenseal as ts
 sys.path.insert(
     0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "shared"))
 )
-from medshield.crypto.selective import create_selective_update
+from medshield.crypto.selective import create_selective_update, apply_selective_update, SelectiveUpdate
 
 # Configure logging
 logging.basicConfig(
@@ -30,6 +30,7 @@ class MedShieldClient(flwr.client.NumPyClient):
         valloader: torch.utils.data.DataLoader,
         device: torch.device,
         public_context=None,
+        secret_context=None,
         local_epochs: int = 1,
         learning_rate: float = 1e-4,
     ):
@@ -38,6 +39,7 @@ class MedShieldClient(flwr.client.NumPyClient):
         self.valloader = valloader
         self.device = device
         self.public_context = public_context
+        self.secret_context = secret_context
         self.local_epochs = local_epochs
 
         # Setup optimizer and loss function (Task 24/25)
@@ -57,6 +59,19 @@ class MedShieldClient(flwr.client.NumPyClient):
         """Load a list of NumPy arrays into the model's state dictionary."""
         if not parameters:
             return
+            
+        # Check if we have received an encrypted payload
+        if len(parameters) == 1 and self.secret_context is not None:
+            # We assume it's a serialized SelectiveUpdate
+            payload_bytes = parameters[0].tobytes() if parameters[0].dtype != np.dtype("O") else parameters[0].item()
+            try:
+                update = SelectiveUpdate.deserialize(payload_bytes, self.secret_context)
+                apply_selective_update(update, self.model, self.secret_context)
+                logger.info("Client: Successfully decrypted and applied global update.")
+                return
+            except Exception as e:
+                logger.warning(f"Client: Failed to deserialize encrypted payload: {e}. Falling back to plaintext.")
+
         params_dict = zip(self.model.state_dict().keys(), parameters)
         state_dict = {k: torch.tensor(v) for k, v in params_dict}
         self.model.load_state_dict(state_dict, strict=True)
@@ -151,12 +166,31 @@ def main():
         with open(public_context_path, "rb") as f:
             public_context = ts.Context.load(f.read())
 
+    # Load secret context for decryption
+    secret_context_path = os.environ.get("HE_SECRET_CONTEXT_PATH", "./keys/secret.ctx")
+    secret_context = None
+    if os.path.exists(secret_context_path):
+        with open(secret_context_path, "rb") as f:
+            secret_context = ts.Context.load(f.read())
+
+    client_partition = int(os.environ.get("CLIENT_PARTITION_ID", "1"))
+    seed = 42 + client_partition
+    
+    # Set reproducible random seeds
+    import random
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(seed)
+
     # Placeholder loaders (replace with your actual data partitioning loader)
     # trainloader, valloader = get_dataloaders(...)
     # For now, if you want to test connectivity with dummy data loaders:
     from torch.utils.data import DataLoader, TensorDataset
 
-    dummy_data = torch.randn(10, 3, 224, 224)
+    # Generate slightly different dummy data per partition
+    dummy_data = torch.randn(10, 3, 224, 224) + client_partition
     dummy_labels = torch.randint(0, 4, (10,))
     dataset = TensorDataset(dummy_data, dummy_labels)
     trainloader = DataLoader(dataset, batch_size=2)
@@ -168,6 +202,7 @@ def main():
         valloader=valloader,
         device=device,
         public_context=public_context,
+        secret_context=secret_context,
         local_epochs=1,
     )
 
@@ -176,3 +211,5 @@ def main():
         server_address=server_address,
         client=client.to_client(),
     )
+if __name__ == "__main__":
+    main()

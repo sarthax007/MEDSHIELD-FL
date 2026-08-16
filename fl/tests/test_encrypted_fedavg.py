@@ -158,6 +158,90 @@ class TestEncryptedFedAvg(unittest.TestCase):
                 )
             )
 
+    def test_aggregate_fit_weighted_sum(self):
+        secret_context = create_ckks_context()
+        public_context = secret_context.copy()
+        public_context.make_context_public()
+        strategy = EncryptedFedAvg()
+        strategy.context = public_context
+
+        model1 = DummyModel()
+        with torch.no_grad():
+            model1.head.weight.fill_(1.0)
+            model1.head.bias.fill_(1.0)
+            model1.non_critical.weight.fill_(1.0)
+            model1.non_critical.bias.fill_(1.0)
+
+        update1 = create_selective_update(model1, public_context)
+
+        model2 = DummyModel()
+        with torch.no_grad():
+            model2.head.weight.fill_(5.0)
+            model2.head.bias.fill_(5.0)
+            model2.non_critical.weight.fill_(5.0)
+            model2.non_critical.bias.fill_(5.0)
+
+        update2 = create_selective_update(model2, public_context)
+
+        # 10 examples for model1 (1.0), 30 examples for model2 (5.0)
+        # Expected average = (1.0 * 10 + 5.0 * 30) / 40 = 160 / 40 = 4.0
+        res1 = FitRes(
+            status=Status(code=Code.OK, message=""),
+            parameters=ndarrays_to_parameters([np.frombuffer(update1.serialize(), dtype=np.uint8)]),
+            num_examples=10,
+            metrics={},
+        )
+        res2 = FitRes(
+            status=Status(code=Code.OK, message=""),
+            parameters=ndarrays_to_parameters([np.frombuffer(update2.serialize(), dtype=np.uint8)]),
+            num_examples=30,
+            metrics={},
+        )
+
+        results = [(MagicMock(spec=ClientProxy), res1), (MagicMock(spec=ClientProxy), res2)]
+        aggregated_params, _ = strategy.aggregate_fit(1, results, [])
+        assert aggregated_params is not None
+
+        ndarrays = parameters_to_ndarrays(aggregated_params)
+        aggregated_update = SelectiveUpdate.deserialize(ndarrays[0].tobytes(), public_context)
+        
+        aggregated_model = DummyModel()
+        apply_selective_update(aggregated_update, aggregated_model, secret_context)
+
+        expected_val = 4.0
+        with torch.no_grad():
+            self.assertTrue(torch.allclose(aggregated_model.head.weight, torch.tensor(expected_val).expand_as(aggregated_model.head.weight), atol=1e-3))
+            self.assertTrue(torch.allclose(aggregated_model.non_critical.weight, torch.tensor(expected_val).expand_as(aggregated_model.non_critical.weight), atol=1e-3))
+
+    def test_aggregate_fit_zero_examples(self):
+        secret_context = create_ckks_context()
+        public_context = secret_context.copy()
+        public_context.make_context_public()
+        strategy = EncryptedFedAvg()
+        strategy.context = public_context
+        
+        model = DummyModel()
+        update = create_selective_update(model, public_context)
+        payload_bytes = update.serialize()
+        
+        res1 = FitRes(
+            status=Status(code=Code.OK, message=""),
+            parameters=ndarrays_to_parameters([np.frombuffer(payload_bytes, dtype=np.uint8)]),
+            num_examples=0,
+            metrics={},
+        )
+        res2 = FitRes(
+            status=Status(code=Code.OK, message=""),
+            parameters=ndarrays_to_parameters([np.frombuffer(payload_bytes, dtype=np.uint8)]),
+            num_examples=0,
+            metrics={},
+        )
+
+        results = [(MagicMock(spec=ClientProxy), res1), (MagicMock(spec=ClientProxy), res2)]
+        
+        aggregated_params, _ = strategy.aggregate_fit(1, results, [])
+        self.assertIsNone(aggregated_params)
+
 
 if __name__ == "__main__":
     unittest.main()

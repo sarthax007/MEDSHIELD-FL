@@ -59,6 +59,10 @@ class EncryptedFedAvg(FedAvg):
         if not updates:
             return None, {}
 
+        if total_examples == 0:
+            logger.warning("Total examples is 0 across all clients. Returning None.")
+            return None, {}
+
         logger.info(f"Aggregating encrypted updates from {len(updates)} clients.")
 
         # Aggregate homomorphically
