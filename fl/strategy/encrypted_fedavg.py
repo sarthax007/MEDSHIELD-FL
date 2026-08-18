@@ -14,6 +14,7 @@ from medshield.crypto.context import create_ckks_context
 from medshield.crypto.selective import SelectiveUpdate
 
 from flwr.common import (
+    EvaluateRes,
     FitRes,
     Parameters,
     Scalar,
@@ -28,10 +29,21 @@ logger = logging.getLogger(__name__)
 
 class EncryptedFedAvg(FedAvg):
     def __init__(self, *args, **kwargs):
+        if "evaluate_metrics_aggregation_fn" not in kwargs:
+            kwargs["evaluate_metrics_aggregation_fn"] = self._aggregate_evaluate_metrics
         super().__init__(*args, **kwargs)
         # The server needs a public context to deserialize and perform homomorphic operations.
         self.context = create_ckks_context()
         self.context.make_context_public()
+
+    def _aggregate_evaluate_metrics(self, metrics: List[Tuple[int, Dict[str, Scalar]]]) -> Dict[str, Scalar]:
+        if not metrics:
+            return {}
+        total_examples = sum([num_examples for num_examples, _ in metrics])
+        if total_examples == 0:
+            return {}
+        weighted_accuracy = sum([num_examples * float(m.get("accuracy", 0.0)) for num_examples, m in metrics])
+        return {"accuracy": weighted_accuracy / total_examples}
 
     def aggregate_fit(
         self,
@@ -49,18 +61,43 @@ class EncryptedFedAvg(FedAvg):
         participating_clients = [client.cid for client, _ in results]
         logger.info(f"Round {server_round}: Participating clients: {participating_clients}")
 
+        # Store participating clients to use in aggregate_evaluate
+        if not hasattr(self, 'round_clients'):
+            self.round_clients = {}
+        self.round_clients[server_round] = participating_clients
+
         # Extract updates and sample counts
         updates: List[Tuple[SelectiveUpdate, int]] = []
+        plaintext_results = []
         total_examples = 0
         for client, fit_res in results:
             ndarrays = parameters_to_ndarrays(fit_res.parameters)
-            if len(ndarrays) == 1 and ndarrays[0].dtype == np.uint8:
-                serialized_update = ndarrays[0].tobytes()
-                update = SelectiveUpdate.deserialize(serialized_update, self.context)
-                updates.append((update, fit_res.num_examples))
-                total_examples += fit_res.num_examples
+            if len(ndarrays) == 1:
+                try:
+                    if ndarrays[0].dtype == np.dtype("O"):
+                        serialized_update = ndarrays[0].item()
+                    else:
+                        serialized_update = ndarrays[0].tobytes()
+                    update = SelectiveUpdate.deserialize(serialized_update, self.context)
+                    updates.append((update, fit_res.num_examples))
+                    total_examples += fit_res.num_examples
+                except Exception as e:
+                    logger.warning(f"Failed to deserialize encrypted update: {e}")
             else:
-                logger.warning("Received unexpected parameters format from client.")
+                plaintext_results.append((client, fit_res))
+
+        if plaintext_results and not updates:
+            logger.info(f"Aggregating {len(plaintext_results)} plaintext updates via standard FedAvg.")
+            agg_parameters, metrics = super().aggregate_fit(server_round, plaintext_results, failures)
+            if agg_parameters is not None:
+                try:
+                    import pickle
+                    from fl.db import save_global_model
+                    save_global_model(server_round, pickle.dumps(parameters_to_ndarrays(agg_parameters)))
+                    logger.info(f"Saved plaintext global model for round {server_round} to database.")
+                except Exception as e:
+                    logger.error(f"Failed to save plaintext global model to database: {e}")
+            return agg_parameters, metrics
 
         if not updates:
             return None, {}
@@ -93,5 +130,34 @@ class EncryptedFedAvg(FedAvg):
 
         payload_bytes = aggregated_selective_update.serialize()
         aggregated_ndarrays = [np.frombuffer(payload_bytes, dtype=np.uint8)]
+        
+        try:
+            from fl.db import save_global_model
+            save_global_model(server_round, payload_bytes)
+            logger.info(f"Saved global model for round {server_round} to database.")
+        except Exception as e:
+            logger.error(f"Failed to save global model to database: {e}")
 
         return ndarrays_to_parameters(aggregated_ndarrays), {}
+
+    def aggregate_evaluate(
+        self,
+        server_round: int,
+        results: List[Tuple[ClientProxy, EvaluateRes]],
+        failures: List[Union[Tuple[ClientProxy, EvaluateRes], BaseException]],
+    ) -> Tuple[Optional[float], Dict[str, Scalar]]:
+        aggregated_loss, aggregated_metrics = super().aggregate_evaluate(server_round, results, failures)
+        
+        # Save metrics if valid
+        if aggregated_loss is not None:
+            accuracy = float(aggregated_metrics.get("accuracy", 0.0)) if aggregated_metrics else 0.0
+            participating_clients = getattr(self, "round_clients", {}).get(server_round, [])
+            
+            try:
+                from fl.db import save_metrics
+                save_metrics(server_round, accuracy, aggregated_loss, participating_clients)
+                logger.info(f"Saved metrics for round {server_round} to database.")
+            except Exception as e:
+                logger.error(f"Failed to save metrics to database: {e}")
+                
+        return aggregated_loss, aggregated_metrics

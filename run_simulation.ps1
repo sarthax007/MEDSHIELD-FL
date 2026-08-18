@@ -2,7 +2,7 @@ $ErrorActionPreference = "Stop"
 
 # Configuration
 $env:FL_MIN_CLIENTS = "3"
-$env:FL_NUM_ROUNDS = "3"
+$env:FL_NUM_ROUNDS = "10"
 $env:FL_SERVER_ADDRESS = "127.0.0.1:8080"
 $env:FL_USE_TLS = "true"
 $env:FL_CA_CERT_PATH = ".certificates/ca.crt"
