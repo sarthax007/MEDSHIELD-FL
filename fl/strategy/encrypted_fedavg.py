@@ -40,8 +40,14 @@ class EncryptedFedAvg(FedAvg):
         failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
     ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
         """Aggregate fit results using homomorphic encryption."""
+        if failures:
+            logger.warning(f"Round {server_round}: {len(failures)} clients failed to complete fit.")
+
         if not results:
             return None, {}
+            
+        participating_clients = [client.cid for client, _ in results]
+        logger.info(f"Round {server_round}: Participating clients: {participating_clients}")
 
         # Extract updates and sample counts
         updates: List[Tuple[SelectiveUpdate, int]] = []

@@ -1,0 +1,21 @@
+Task 56 — Implement client dropout and fault tolerance
+Keep training working when a hospital disconnects or fails mid-round.
+Acceptance criteria (done when all are true):
+☐  If a client fails to report in a round, the server still aggregates the remaining clients and continues.
+☐  A disconnected client can rejoin in a later round and receive the current global model.
+☐  The system logs which clients participated in each round.
+☐  A simulated mid-round dropout does not crash the server or corrupt the global model.
+Task 57 — Secure the client-server communication channel
+Encrypt the transport layer (in addition to the homomorphic layer) between clients and server.
+Acceptance criteria (done when all are true):
+☐  Client-server communication uses TLS/secure gRPC, configurable via settings.
+☐  A connection without valid transport security is refused or clearly flagged.
+☐  Transport security is documented as a second, independent layer from homomorphic encryption.
+☐  A round completes successfully over the secured channel.
+Task 58 — Persist per-round metrics and global model versions
+Store every round's metrics and a versioned global model so progress is auditable.
+Acceptance criteria (done when all are true):
+☐  Each round's accuracy, loss, and participating hospitals are written to the database.
+☐  Each new global model version is stored and retrievable by round number.
+☐  The history can be queried to show accuracy improving over rounds.
+☐  Stored model versions can be reloaded 

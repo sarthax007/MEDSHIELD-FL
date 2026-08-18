@@ -206,10 +206,21 @@ def main():
         local_epochs=1,
     )
 
+    use_tls = os.environ.get("FL_USE_TLS", "false").lower() == "true"
+    root_certificates = None
+    if use_tls:
+        ca_cert_path = os.environ.get("FL_CA_CERT_PATH", ".certificates/ca.crt")
+        from pathlib import Path
+        root_certificates = Path(ca_cert_path).read_bytes()
+        logger.info("Transport layer security (TLS) is ENABLED.")
+    else:
+        logger.warning("Transport layer security (TLS) is DISABLED.")
+
     # Start the Flower client
     flwr.client.start_client(
         server_address=server_address,
         client=client.to_client(),
+        root_certificates=root_certificates,
     )
 if __name__ == "__main__":
     main()

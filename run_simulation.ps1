@@ -4,6 +4,10 @@ $ErrorActionPreference = "Stop"
 $env:FL_MIN_CLIENTS = "3"
 $env:FL_NUM_ROUNDS = "3"
 $env:FL_SERVER_ADDRESS = "127.0.0.1:8080"
+$env:FL_USE_TLS = "true"
+$env:FL_CA_CERT_PATH = ".certificates/ca.crt"
+$env:FL_SERVER_CERT_PATH = ".certificates/server.pem"
+$env:FL_SERVER_KEY_PATH = ".certificates/server.key"
 $PYTHON_EXEC = "python" # Adjust if you use a specific virtual environment python executable
 
 Write-Host "Starting Flower server..."
