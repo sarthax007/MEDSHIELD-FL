@@ -1,0 +1,355 @@
+{
+    "labelled_pool": [
+        "item_26",
+        "item_13",
+        "item_9",
+        "item_99",
+        "item_73",
+        "item_94",
+        "item_5",
+        "item_0",
+        "item_66",
+        "item_84",
+        "item_30",
+        "item_16",
+        "item_78",
+        "item_33",
+        "item_31",
+        "item_58",
+        "item_2",
+        "item_12",
+        "item_24",
+        "item_86",
+        "item_20",
+        "item_74",
+        "item_35",
+        "item_17",
+        "item_1",
+        "item_19",
+        "item_63",
+        "item_46",
+        "item_89",
+        "item_51",
+        "item_7",
+        "item_49",
+        "item_76",
+        "item_3",
+        "item_4"
+    ],
+    "unlabeled_pool": [
+        "item_95",
+        "item_80",
+        "item_60",
+        "item_37",
+        "item_8",
+        "item_83",
+        "item_21",
+        "item_87",
+        "item_65",
+        "item_42",
+        "item_27",
+        "item_88",
+        "item_54",
+        "item_59",
+        "item_97",
+        "item_47",
+        "item_72",
+        "item_38",
+        "item_25",
+        "item_40",
+        "item_82",
+        "item_48",
+        "item_91",
+        "item_18",
+        "item_79",
+        "item_57",
+        "item_28",
+        "item_10",
+        "item_45",
+        "item_43",
+        "item_15",
+        "item_36",
+        "item_68",
+        "item_61",
+        "item_34",
+        "item_29",
+        "item_23",
+        "item_32",
+        "item_75",
+        "item_93",
+        "item_55",
+        "item_98",
+        "item_53",
+        "item_77",
+        "item_14",
+        "item_11",
+        "item_41",
+        "item_96",
+        "item_92",
+        "item_62",
+        "item_56",
+        "item_52",
+        "item_67",
+        "item_85",
+        "item_22",
+        "item_69",
+        "item_6",
+        "item_39",
+        "item_70",
+        "item_64",
+        "item_71",
+        "item_81",
+        "item_44",
+        "item_50",
+        "item_90"
+    ],
+    "labels": {
+        "item_0": 3,
+        "item_1": 1,
+        "item_2": 0,
+        "item_3": 1,
+        "item_4": 2,
+        "item_24": 2,
+        "item_35": 1,
+        "item_30": 3,
+        "item_74": 1,
+        "item_46": 2,
+        "item_26": 3,
+        "item_86": 0,
+        "item_94": 3,
+        "item_63": 0,
+        "item_49": 1,
+        "item_17": 2,
+        "item_51": 0,
+        "item_84": 3,
+        "item_5": 3,
+        "item_66": 0,
+        "item_9": 1,
+        "item_33": 3,
+        "item_58": 3,
+        "item_73": 1,
+        "item_78": 1,
+        "item_31": 1,
+        "item_7": 1,
+        "item_13": 2,
+        "item_20": 3,
+        "item_16": 2,
+        "item_19": 3,
+        "item_12": 3,
+        "item_76": 3,
+        "item_89": 3,
+        "item_99": 2
+    },
+    "audit_log": [
+        {
+            "item_id": "item_0",
+            "label": 3,
+            "user_id": "seeder",
+            "timestamp": "2026-08-19T20:01:27.134005+00:00"
+        },
+        {
+            "item_id": "item_1",
+            "label": 1,
+            "user_id": "seeder",
+            "timestamp": "2026-08-19T20:01:27.136004+00:00"
+        },
+        {
+            "item_id": "item_2",
+            "label": 0,
+            "user_id": "seeder",
+            "timestamp": "2026-08-19T20:01:27.137003+00:00"
+        },
+        {
+            "item_id": "item_3",
+            "label": 1,
+            "user_id": "seeder",
+            "timestamp": "2026-08-19T20:01:27.139001+00:00"
+        },
+        {
+            "item_id": "item_4",
+            "label": 2,
+            "user_id": "seeder",
+            "timestamp": "2026-08-19T20:01:27.140000+00:00"
+        },
+        {
+            "item_id": "item_24",
+            "label": 2,
+            "user_id": "sim_doctor",
+            "timestamp": "2026-08-19T20:01:27.192297+00:00"
+        },
+        {
+            "item_id": "item_35",
+            "label": 1,
+            "user_id": "sim_doctor",
+            "timestamp": "2026-08-19T20:01:27.194296+00:00"
+        },
+        {
+            "item_id": "item_30",
+            "label": 3,
+            "user_id": "sim_doctor",
+            "timestamp": "2026-08-19T20:01:27.196297+00:00"
+        },
+        {
+            "item_id": "item_74",
+            "label": 1,
+            "user_id": "sim_doctor",
+            "timestamp": "2026-08-19T20:01:27.197298+00:00"
+        },
+        {
+            "item_id": "item_46",
+            "label": 2,
+            "user_id": "sim_doctor",
+            "timestamp": "2026-08-19T20:01:27.198297+00:00"
+        },
+        {
+            "item_id": "item_26",
+            "label": 3,
+            "user_id": "sim_doctor",
+            "timestamp": "2026-08-19T20:01:27.199300+00:00"
+        },
+        {
+            "item_id": "item_86",
+            "label": 0,
+            "user_id": "sim_doctor",
+            "timestamp": "2026-08-19T20:01:27.201295+00:00"
+        },
+        {
+            "item_id": "item_94",
+            "label": 3,
+            "user_id": "sim_doctor",
+            "timestamp": "2026-08-19T20:01:27.202297+00:00"
+        },
+        {
+            "item_id": "item_63",
+            "label": 0,
+            "user_id": "sim_doctor",
+            "timestamp": "2026-08-19T20:01:27.204296+00:00"
+        },
+        {
+            "item_id": "item_49",
+            "label": 1,
+            "user_id": "sim_doctor",
+            "timestamp": "2026-08-19T20:01:27.205298+00:00"
+        },
+        {
+            "item_id": "item_17",
+            "label": 2,
+            "user_id": "sim_doctor",
+            "timestamp": "2026-08-19T20:01:27.240294+00:00"
+        },
+        {
+            "item_id": "item_51",
+            "label": 0,
+            "user_id": "sim_doctor",
+            "timestamp": "2026-08-19T20:01:27.243295+00:00"
+        },
+        {
+            "item_id": "item_84",
+            "label": 3,
+            "user_id": "sim_doctor",
+            "timestamp": "2026-08-19T20:01:27.244295+00:00"
+        },
+        {
+            "item_id": "item_5",
+            "label": 3,
+            "user_id": "sim_doctor",
+            "timestamp": "2026-08-19T20:01:27.246295+00:00"
+        },
+        {
+            "item_id": "item_66",
+            "label": 0,
+            "user_id": "sim_doctor",
+            "timestamp": "2026-08-19T20:01:27.247297+00:00"
+        },
+        {
+            "item_id": "item_9",
+            "label": 1,
+            "user_id": "sim_doctor",
+            "timestamp": "2026-08-19T20:01:27.249295+00:00"
+        },
+        {
+            "item_id": "item_33",
+            "label": 3,
+            "user_id": "sim_doctor",
+            "timestamp": "2026-08-19T20:01:27.251295+00:00"
+        },
+        {
+            "item_id": "item_58",
+            "label": 3,
+            "user_id": "sim_doctor",
+            "timestamp": "2026-08-19T20:01:27.252296+00:00"
+        },
+        {
+            "item_id": "item_73",
+            "label": 1,
+            "user_id": "sim_doctor",
+            "timestamp": "2026-08-19T20:01:27.254295+00:00"
+        },
+        {
+            "item_id": "item_78",
+            "label": 1,
+            "user_id": "sim_doctor",
+            "timestamp": "2026-08-19T20:01:27.256294+00:00"
+        },
+        {
+            "item_id": "item_31",
+            "label": 1,
+            "user_id": "sim_doctor",
+            "timestamp": "2026-08-19T20:01:27.301297+00:00"
+        },
+        {
+            "item_id": "item_7",
+            "label": 1,
+            "user_id": "sim_doctor",
+            "timestamp": "2026-08-19T20:01:27.303297+00:00"
+        },
+        {
+            "item_id": "item_13",
+            "label": 2,
+            "user_id": "sim_doctor",
+            "timestamp": "2026-08-19T20:01:27.305296+00:00"
+        },
+        {
+            "item_id": "item_20",
+            "label": 3,
+            "user_id": "sim_doctor",
+            "timestamp": "2026-08-19T20:01:27.307296+00:00"
+        },
+        {
+            "item_id": "item_16",
+            "label": 2,
+            "user_id": "sim_doctor",
+            "timestamp": "2026-08-19T20:01:27.309296+00:00"
+        },
+        {
+            "item_id": "item_19",
+            "label": 3,
+            "user_id": "sim_doctor",
+            "timestamp": "2026-08-19T20:01:27.311297+00:00"
+        },
+        {
+            "item_id": "item_12",
+            "label": 3,
+            "user_id": "sim_doctor",
+            "timestamp": "2026-08-19T20:01:27.313296+00:00"
+        },
+        {
+            "item_id": "item_76",
+            "label": 3,
+            "user_id": "sim_doctor",
+            "timestamp": "2026-08-19T20:01:27.316295+00:00"
+        },
+        {
+            "item_id": "item_89",
+            "label": 3,
+            "user_id": "sim_doctor",
+            "timestamp": "2026-08-19T20:01:27.318295+00:00"
+        },
+        {
+            "item_id": "item_99",
+            "label": 2,
+            "user_id": "sim_doctor",
+            "timestamp": "2026-08-19T20:01:27.320295+00:00"
+        }
+    ]
+}
