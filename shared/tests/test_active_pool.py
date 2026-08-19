@@ -25,7 +25,7 @@ def test_pool_initialization():
         if os.path.exists(state_path):
             os.remove(state_path)
 
-def test_label_items():
+def test_submit_label():
     with tempfile.NamedTemporaryFile(suffix=".json", delete=False) as tmp:
         state_path = tmp.name
         
@@ -34,7 +34,8 @@ def test_label_items():
         manager = DataPoolManager(state_path, initial_items=initial_items)
         
         # Move items
-        manager.label_items(["img_2", "img_4", "img_5"]) # img_5 doesn't exist, should be ignored
+        manager.submit_label("img_2", label=1, user_id="doc1")
+        manager.submit_label("img_4", label=0, user_id="doc2")
         
         sizes = manager.get_pool_sizes()
         assert sizes["labelled"] == 2
@@ -42,6 +43,19 @@ def test_label_items():
         
         assert set(manager.get_labelled_pool()) == {"img_2", "img_4"}
         assert set(manager.get_unlabeled_pool()) == {"img_1", "img_3"}
+        
+        # Check labels and audit log
+        labels = manager.get_labels()
+        assert labels["img_2"] == 1
+        assert labels["img_4"] == 0
+        
+        audit_log = manager.get_audit_log()
+        assert len(audit_log) == 2
+        assert audit_log[0]["item_id"] == "img_2"
+        assert audit_log[0]["user_id"] == "doc1"
+        assert audit_log[1]["item_id"] == "img_4"
+        assert audit_log[1]["user_id"] == "doc2"
+        assert "timestamp" in audit_log[0]
         
     finally:
         if os.path.exists(state_path):
@@ -56,7 +70,7 @@ def test_state_persistence():
         
         # First instance
         manager1 = DataPoolManager(state_path, initial_items=initial_items)
-        manager1.label_items(["img_1"])
+        manager1.submit_label("img_1", label=2, user_id="doc3")
         
         # Second instance (should load state from disk)
         manager2 = DataPoolManager(state_path)
@@ -64,6 +78,8 @@ def test_state_persistence():
         assert manager2.get_pool_sizes()["labelled"] == 1
         assert manager2.get_pool_sizes()["unlabeled"] == 2
         assert "img_1" in manager2.get_labelled_pool()
+        assert manager2.get_labels()["img_1"] == 2
+        assert manager2.get_audit_log()[0]["user_id"] == "doc3"
         
     finally:
         if os.path.exists(state_path):

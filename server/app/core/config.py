@@ -15,6 +15,8 @@ class Settings(BaseSettings):
     FL_NUM_ROUNDS: int = 10
     FL_MIN_CLIENTS: int = 2
 
+    ACTIVE_LEARNING_BUDGET: int = 10
+
     HE_POLY_MOD_DEGREE: int = 8192
     HE_COEFF_MOD_BIT_SIZES: str = "60,40,40,60"
     HE_SCALE: float = 2**40

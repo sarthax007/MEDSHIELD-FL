@@ -1,5 +1,6 @@
 import json
 import os
+import datetime
 from typing import List, Dict, Optional
 
 class DataPoolManager:
@@ -15,6 +16,8 @@ class DataPoolManager:
         self.state_file_path = state_file_path
         self.unlabeled_pool = set()
         self.labelled_pool = set()
+        self.labels = {}
+        self.audit_log = []
         
         self._load_or_initialize_state(initial_items, initial_labelled)
 
@@ -25,6 +28,8 @@ class DataPoolManager:
                     state = json.load(f)
                 self.unlabeled_pool = set(state.get("unlabeled_pool", []))
                 self.labelled_pool = set(state.get("labelled_pool", []))
+                self.labels = state.get("labels", {})
+                self.audit_log = state.get("audit_log", [])
             except json.JSONDecodeError:
                 # If file is corrupt, re-initialize if possible
                 self._initialize_from_scratch(initial_items, initial_labelled)
@@ -43,6 +48,8 @@ class DataPoolManager:
         # Ensure initial labelled items are actually part of the items
         self.labelled_pool = init_labelled_set.intersection(initial_set)
         self.unlabeled_pool = initial_set - self.labelled_pool
+        self.labels = {}
+        self.audit_log = []
         
         self.save_state()
 
@@ -51,10 +58,38 @@ class DataPoolManager:
 
     def get_labelled_pool(self) -> List[str]:
         return list(self.labelled_pool)
+        
+    def get_labels(self) -> Dict[str, int]:
+        return self.labels
+        
+    def get_audit_log(self) -> List[Dict]:
+        return self.audit_log
+
+    def submit_label(self, item_id: str, label: int, user_id: str, timestamp: Optional[str] = None):
+        """
+        Move item from unlabeled to labelled pool, store the label and audit record.
+        """
+        if timestamp is None:
+            timestamp = datetime.datetime.now(datetime.timezone.utc).isoformat()
+            
+        if item_id in self.unlabeled_pool:
+            self.unlabeled_pool.remove(item_id)
+            self.labelled_pool.add(item_id)
+            
+        self.labels[item_id] = label
+        self.audit_log.append({
+            "item_id": item_id,
+            "label": label,
+            "user_id": user_id,
+            "timestamp": timestamp
+        })
+        
+        self.save_state()
 
     def label_items(self, item_ids: List[str]):
         """
-        Move items from unlabeled to labelled pool.
+        Legacy method. Used mostly in older tests. Moves items from unlabeled to labelled pool.
+        For proper label tracking, use submit_label.
         """
         for item_id in item_ids:
             if item_id in self.unlabeled_pool:
@@ -75,7 +110,9 @@ class DataPoolManager:
         
         state = {
             "labelled_pool": list(self.labelled_pool),
-            "unlabeled_pool": list(self.unlabeled_pool)
+            "unlabeled_pool": list(self.unlabeled_pool),
+            "labels": self.labels,
+            "audit_log": self.audit_log
         }
         
         with open(self.state_file_path, 'w') as f:
