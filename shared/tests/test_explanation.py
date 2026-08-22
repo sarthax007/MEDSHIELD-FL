@@ -23,3 +23,25 @@ def test_generate_clinical_explanation():
         explanation_2
         == "The model predicts Healthy with 45% confidence, focusing primarily on the cerebellum area."
     )
+
+
+def test_determine_heatmap_region():
+    import numpy as np
+    from shared.medshield.explain.explanation_text import determine_heatmap_region
+
+    # Create a blank 100x100 array
+    mask = np.zeros((100, 100))
+
+    # Test center
+    mask[50, 50] = 1.0
+    assert determine_heatmap_region(mask) == "center"
+
+    # Test upper-left
+    mask.fill(0)
+    mask[10, 10] = 1.0
+    assert determine_heatmap_region(mask) == "upper-left quadrant"
+
+    # Test lower-right
+    mask.fill(0)
+    mask[90, 90] = 1.0
+    assert determine_heatmap_region(mask) == "lower-right quadrant"

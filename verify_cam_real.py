@@ -77,6 +77,32 @@ def test_vit_cam_real():
     cv2.imwrite(out_path, cv2.cvtColor(cam_vis, cv2.COLOR_RGB2BGR))
     print(f"Saved overlay to {out_path}")
 
+    # Generate Clinical Explanation
+    from shared.medshield.explain.explanation_text import (
+        generate_clinical_explanation,
+        determine_heatmap_region,
+    )
+
+    # Forward pass to get prediction
+    with torch.no_grad():
+        logits = model(input_tensor)
+        probs = torch.nn.functional.softmax(logits, dim=1)[0]
+        conf, pred_idx = torch.max(probs, dim=0)
+
+    class_names = ["Healthy", "Tumor"]
+    predicted_class = class_names[int(pred_idx.item())]
+
+    region = determine_heatmap_region(cam)
+    explanation = generate_clinical_explanation(predicted_class, conf.item(), region)
+
+    print("\n--- Clinical Explanation ---")
+    print(explanation)
+    print("----------------------------\n")
+
+    with open("explanation.txt", "w") as f:
+        f.write(explanation)
+    print("Saved explanation to explanation.txt")
+
 
 if __name__ == "__main__":
     test_vit_cam_real()
