@@ -12,7 +12,7 @@ from __future__ import annotations
 import torch
 import torch.nn as nn
 
-from medshield.model.serialization import (
+from .serialization import (
     critical_vector_to_model,
     model_to_critical_vector,
     model_to_vector,

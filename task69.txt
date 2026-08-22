@@ -1,0 +1,9 @@
+Task 69 — Implement Grad-CAM adapted for Vision Transformers
+Implement a Grad-CAM (or attention-rollout style) method that works with the ViT architecture,
+not just CNNs.
+Acceptance criteria (done when all are true):
+☐  A Grad-CAM variant appropriate for ViT is implemented and produces a saliency map for a
+prediction.
+☐  The method targets a suitable ViT layer/attention block, documented with rationale.
+☐  The map has the same spatial extent as the input image after upsampling.
+☐  Running it on a clear tumor case highlights a plausible region on inspection.
