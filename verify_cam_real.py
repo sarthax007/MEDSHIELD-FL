@@ -1,14 +1,17 @@
+import os
+import cv2
 import torch
 import numpy as np
+import nibabel as nib
 from shared.medshield.model.vit import TumorClassifier
-from shared.medshield.explain.vit_cam import ViTGradCAM, reshape_transform_vit_timm
-import os
+from shared.medshield.explain.vit_cam import (
+    ViTGradCAM,
+    reshape_transform_vit_timm,
+    show_cam_on_image,
+)
 
-import cv2
-from shared.medshield.explain.vit_cam import show_cam_on_image
 
-
-def test_vit_cam():
+def test_vit_cam_real():
     # Load model
     model = TumorClassifier(pretrained=False)  # Random init for testing the shape
     model.eval()
@@ -23,20 +26,23 @@ def test_vit_cam():
         reshape_transform=reshape_transform_vit_timm,
     )
 
-    # Load synthetic image
-    image_path = "data/synthetic_baseline/7_slice5.npy"
+    # Load real image
+    image_path = "data/raw/BraTS2021_00495_flair.nii.gz"
     if not os.path.exists(image_path):
         print(f"Test image not found at {image_path}. Skipping.")
         return
 
-    # Image is [4, 240, 240] or similar. We need [1, 3, 224, 224] for standard ViT.
-    img_array = np.load(image_path)
+    # Load the NIfTI file
+    nii_img = nib.load(image_path)
+    img_data = nii_img.get_fdata()  # type: ignore
 
-    # Simple preprocessing: take 1st channel, resize to 224x224, repeat to 3 channels
-    img_2d = img_array[0] if img_array.ndim > 2 else img_array
+    # Get a middle slice from the 3D volume
+    # Shape is typically [H, W, D]. We slice along the depth dimension.
+    slice_idx = img_data.shape[2] // 2
+    img_2d = img_data[:, :, slice_idx]
 
-    # Just center crop/resize to 224 for a quick test
-    img_2d = img_2d[:224, :224]
+    # Resize to 224x224
+    img_2d = cv2.resize(img_2d, (224, 224))
 
     # Normalize for show_cam_on_image [0, 1]
     img_2d_norm = (img_2d - img_2d.min()) / (img_2d.max() - img_2d.min() + 1e-8)
@@ -66,11 +72,11 @@ def test_vit_cam():
     # Show cam on image
     cam_vis = show_cam_on_image(vis_img, cam, use_rgb=True)
 
-    out_path = "tumor_heatmap_overlay.jpg"
+    out_path = "real_brain_heatmap_overlay.jpg"
     # OpenCV expects BGR for saving
     cv2.imwrite(out_path, cv2.cvtColor(cam_vis, cv2.COLOR_RGB2BGR))
     print(f"Saved overlay to {out_path}")
 
 
 if __name__ == "__main__":
-    test_vit_cam()
+    test_vit_cam_real()

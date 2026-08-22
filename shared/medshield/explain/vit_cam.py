@@ -1,3 +1,5 @@
+import cv2
+import numpy as np
 import torch
 import torch.nn.functional as F  # noqa: N812
 
@@ -128,4 +130,43 @@ def reshape_transform_vit_timm(tensor, height=14, width=14):
     result = result.reshape(tensor.size(0), height, width, tensor.size(2))
     # Transpose to [batch, hidden_dim, height, width]
     result = result.permute(0, 3, 1, 2)
+    return result
+
+
+def show_cam_on_image(
+    img: np.ndarray,
+    mask: np.ndarray,
+    use_rgb: bool = False,
+    colormap: int = cv2.COLORMAP_JET,
+    image_weight: float = 0.5,
+) -> np.ndarray:
+    """
+    Overlays a Grad-CAM heatmap on the original image.
+
+    Args:
+        img: The original image, usually a numpy array with shape (H, W, 3) and values in [0, 1].
+        mask: The Grad-CAM heatmap, usually a numpy array with shape (H, W) and values in [0, 1].
+        use_rgb: Whether to return an RGB image (OpenCV uses BGR by default).
+        colormap: OpenCV colormap identifier.
+        image_weight: How much the original image is weighted vs the heatmap.
+                      (1 - image_weight) will be used for the heatmap.
+
+    Returns:
+        The composited overlay image, normalized in [0, 1].
+    """
+    heatmap: np.ndarray = cv2.applyColorMap((255 * mask).astype(np.uint8), colormap)
+    if use_rgb:
+        heatmap = cv2.cvtColor(heatmap, cv2.COLOR_BGR2RGB)
+    heatmap = np.float32(heatmap) / 255
+
+    if np.max(img) > 1.0:
+        raise Exception("The input image should np.float32 in the range [0, 1]")
+
+    if len(img.shape) == 2:
+        img = cv2.cvtColor((255 * img).astype(np.uint8), cv2.COLOR_GRAY2RGB)
+        img = np.float32(img) / 255
+
+    cam = (1 - image_weight) * heatmap + image_weight * img
+    cam = cam / np.max(cam)
+    result: np.ndarray = (255 * cam).astype(np.uint8)
     return result
