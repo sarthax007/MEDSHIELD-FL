@@ -1,36 +1,47 @@
 import os
 import matplotlib.pyplot as plt
 import nibabel as nib
-import numpy as np
 
-# Pointing to the real BraTS 3D volume you just downloaded
-file_path = "data/raw/BraTS2021_00495_flair.nii.gz"
+# Point to both the MRI and the Segmentation Mask
+flair_path = "data/raw/BraTS2021_00495_t2.nii.gz"
+seg_path = "data/raw/BraTS2021_00495_seg.nii.gz"
 
-if not os.path.exists(file_path):
-    print(f"Oops! Could not find the file at: {file_path}")
+if not os.path.exists(flair_path) or not os.path.exists(seg_path):
+    print(
+        "Oops! Could not find the files. Make sure both the flair and seg files are in data/raw/"
+    )
 else:
-    print(f"Loading 3D Medical Volume from {file_path}...")
+    print("Loading 3D Medical Volumes...")
 
-    # Load the 3D NIfTI volume using nibabel
-    img = nib.load(file_path)
+    # Load the 3D NIfTI volumes using nibabel
+    flair_img = nib.load(flair_path)
+    seg_img = nib.load(seg_path)
 
-    # Extract the data into a standard Numpy array
-    image_data = np.asanyarray(img.dataobj)  # type: ignore
+    # Extract the data into standard Numpy arrays
+    flair_data = flair_img.get_fdata()  # type: ignore
+    seg_data = seg_img.get_fdata()  # type: ignore
 
-    print(f"Successfully loaded 3D scan with shape: {image_data.shape}")
+    print(f"Successfully loaded scans with shape: {flair_data.shape}")
 
-    # Extract the middle 2D slice to view
-    middle_slice_idx = image_data.shape[2] // 2
-    slice_2d = image_data[:, :, middle_slice_idx]
+    # Extract the middle 2D slice to view (usually where the tumor is most visible)
+    middle_slice_idx = 100
+    flair_slice = flair_data[:, :, middle_slice_idx]
+    seg_slice = seg_data[:, :, middle_slice_idx]
 
-    # Display the real brain scan using matplotlib
-    plt.figure(figsize=(6, 6))
+    # Display the real brain scan and the mask side-by-side using matplotlib
+    fig, axes = plt.subplots(1, 2, figsize=(12, 6))
 
-    # Transpose and fix orientation
-    plt.imshow(slice_2d.T, cmap="gray", origin="lower")
+    # 1. Plot the Grayscale MRI
+    axes[0].imshow(flair_slice.T, cmap="gray", origin="lower")
+    axes[0].set_title(f"Real BraTS MRI (Slice #{middle_slice_idx})")
+    axes[0].axis("off")
 
-    plt.title(f"Real BraTS MRI Slice (Slice #{middle_slice_idx})")
-    plt.axis("off")
+    # 2. Plot the Colored Tumor Mask
+    # The BraTS dataset uses specific integer labels (1, 2, 4) for different tumor regions.
+    axes[1].imshow(seg_slice.T, cmap="nipy_spectral", origin="lower")
+    axes[1].set_title("Ground-Truth Tumor Mask")
+    axes[1].axis("off")
 
     print("Opening medical image viewer...")
+    plt.tight_layout()
     plt.show()

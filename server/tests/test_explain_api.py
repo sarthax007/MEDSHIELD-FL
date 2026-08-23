@@ -48,3 +48,42 @@ def test_explain_endpoint_no_file():
     response = client.post("/explain")
     # FastAPI's default for missing file is 422 Unprocessable Entity
     assert response.status_code == 422
+
+
+def test_explain_endpoint_cache_and_get():
+    # Ensure a clean cache directory for tests if needed, but we can just use the endpoint
+    image = Image.new("L", (224, 224), color=200)
+    img_byte_arr = io.BytesIO()
+    image.save(img_byte_arr, format="JPEG")
+    img_byte_arr.seek(0)
+    img_bytes = img_byte_arr.read()
+
+    # First request - cache miss
+    response1 = client.post(
+        "/explain", files={"file": ("test_cache.jpg", img_bytes, "image/jpeg")}
+    )
+    assert response1.status_code == 200
+    data1 = response1.json()
+    assert "prediction_id" in data1
+    prediction_id = data1["prediction_id"]
+
+    # Second request - cache hit
+    response2 = client.post(
+        "/explain", files={"file": ("test_cache.jpg", img_bytes, "image/jpeg")}
+    )
+    assert response2.status_code == 200
+    data2 = response2.json()
+    assert data2["prediction_id"] == prediction_id
+    assert data1["prediction"] == data2["prediction"]
+
+    # Third request - GET endpoint
+    response3 = client.get(f"/explain/{prediction_id}")
+    assert response3.status_code == 200
+    data3 = response3.json()
+    assert data3["prediction_id"] == prediction_id
+    assert data3["explanation"] == data1["explanation"]
+
+
+def test_explain_endpoint_get_not_found():
+    response = client.get("/explain/non_existent_id")
+    assert response.status_code == 404

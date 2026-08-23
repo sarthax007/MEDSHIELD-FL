@@ -1,4 +1,6 @@
 import base64
+import hashlib
+import json
 import os
 import tempfile
 
@@ -24,6 +26,11 @@ router = APIRouter(
     prefix="/explain",
     tags=["explainability"],
 )
+
+# Storage location for explanation artifacts.
+# Retention policy: Indefinitely retained until database storage is implemented in Task 77.
+CACHE_DIR = "data/explanations"
+os.makedirs(CACHE_DIR, exist_ok=True)
 
 # Global model instance for the endpoint
 model = None
@@ -54,8 +61,19 @@ async def explain_prediction(file: UploadFile = File(...)):
         if file.filename.lower().endswith(".nii.gz")
         else os.path.splitext(file.filename)[1]
     )
+
+    content = await file.read()
+    prediction_id = hashlib.sha256(content).hexdigest()
+
+    cache_file = os.path.join(CACHE_DIR, f"{prediction_id}.json")
+    if os.path.exists(cache_file):
+        with open(cache_file, "r") as f:
+            cached_data = json.load(f)
+            # Ensure prediction_id is in the response just in case the cached version didn't have it
+            cached_data["prediction_id"] = prediction_id
+            return JSONResponse(content=cached_data)
+
     with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
-        content = await file.read()
         tmp.write(content)
         tmp_path = tmp.name
 
@@ -121,14 +139,34 @@ async def explain_prediction(file: UploadFile = File(...)):
         _, buffer = cv2.imencode(".jpg", cam_vis_bgr)
         heatmap_base64 = base64.b64encode(buffer).decode("utf-8")
 
-        return JSONResponse(
-            content={
-                "prediction": predicted_class,
-                "confidence": confidence_val,
-                "explanation": explanation,
-                "heatmap_base64": heatmap_base64,
-            }
-        )
+        response_data = {
+            "prediction_id": prediction_id,
+            "prediction": predicted_class,
+            "confidence": confidence_val,
+            "explanation": explanation,
+            "heatmap_base64": heatmap_base64,
+        }
+
+        # Save to cache
+        with open(cache_file, "w") as f:
+            json.dump(response_data, f)
+
+        return JSONResponse(content=response_data)
     finally:
         if os.path.exists(tmp_path):
             os.remove(tmp_path)
+
+
+@router.get("/{prediction_id}")
+async def get_explanation(prediction_id: str):
+    """
+    Retrieve a cached explanation artifact by its prediction ID.
+    """
+    cache_file = os.path.join(CACHE_DIR, f"{prediction_id}.json")
+    if not os.path.exists(cache_file):
+        raise HTTPException(status_code=404, detail="Explanation artifact not found.")
+
+    with open(cache_file, "r") as f:
+        cached_data = json.load(f)
+
+    return JSONResponse(content=cached_data)
