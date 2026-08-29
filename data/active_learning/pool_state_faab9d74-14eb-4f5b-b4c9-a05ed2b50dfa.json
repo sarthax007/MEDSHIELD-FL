@@ -1,0 +1,15 @@
+{
+  "labelled_pool": ["96a00495-cce8-4e74-b1a2-e7c230bc3f22"],
+  "unlabeled_pool": ["b2828a29-f1bd-4d4f-b354-1da05fe89082"],
+  "labels": {
+    "96a00495-cce8-4e74-b1a2-e7c230bc3f22": 1
+  },
+  "audit_log": [
+    {
+      "item_id": "96a00495-cce8-4e74-b1a2-e7c230bc3f22",
+      "label": 1,
+      "user_id": "9ec36f82-3a51-4763-9fd3-c5af82db1222",
+      "timestamp": "2026-08-29T11:16:00.393688+00:00"
+    }
+  ]
+}

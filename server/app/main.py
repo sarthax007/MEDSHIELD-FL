@@ -12,6 +12,7 @@ from app.api.routers import (
     predictions,
     labelling,
     metrics,
+    privacy,
 )
 from app.db.session import get_db
 
@@ -42,6 +43,7 @@ app.include_router(rounds.router)
 app.include_router(predictions.router)
 app.include_router(labelling.router)
 app.include_router(metrics.router)
+app.include_router(privacy.router)
 
 
 @app.get("/health")

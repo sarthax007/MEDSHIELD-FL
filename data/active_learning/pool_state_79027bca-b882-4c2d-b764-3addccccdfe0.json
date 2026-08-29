@@ -1,0 +1,15 @@
+{
+  "labelled_pool": ["eac40f84-2e3b-4f89-b608-14d9e8b7dc1c"],
+  "unlabeled_pool": ["10ae0024-ef34-415a-b83e-b031f7e3b8a4"],
+  "labels": {
+    "eac40f84-2e3b-4f89-b608-14d9e8b7dc1c": 1
+  },
+  "audit_log": [
+    {
+      "item_id": "eac40f84-2e3b-4f89-b608-14d9e8b7dc1c",
+      "label": 1,
+      "user_id": "5e35ac85-dd0a-4fd2-a373-99c70c466b77",
+      "timestamp": "2026-08-29T11:11:26.002350+00:00"
+    }
+  ]
+}

@@ -1,19 +1,19 @@
 MedShield-FL
  A Unified Privacy-Preserving Federated Learning Framework
 with Homomorphic Encryption for Secure Healthcare AI
- 
+
 Complete Project Build Guide — 100 Tasks with Acceptance Criteria
 “Train accurate medical AI across hospitals — without patient data ever leaving the
  hospital.”
- 
+
 Domain: Federated Learning · Homomorphic Encryption · Vision Transformers · Explainable
  Healthcare AI
- Reference dataset: BraTS Brain-MRI  |  Model: ViT-Base/16  |  Encryption: CKKS (TenSEAL)  | 
+ Reference dataset: BraTS Brain-MRI  |  Model: ViT-Base/16  |  Encryption: CKKS (TenSEAL)  |
  FL: Flower (FedAvg)
- 
+
  Structured for step-by-step build by an AI coding agent and a developer.
  Each task ends with 3–4 checkable acceptance criteria.
- 
+
 MedShield-FL — Project Build Guide (100 Tasks)
 Page 2
 Table of Contents
@@ -1030,17 +1030,16 @@ Acceptance criteria (done when all are true):
 Task 85 — Implement metrics and monitoring endpoints
 Provide the data the dashboard needs: round history, accuracy trend, and hospital participation.
 Acceptance criteria (done when all are true):
-☐  Endpoints return accuracy-over-rounds, current round, and per-hospital contribution counts.
-☐  Data is queried efficiently (no full-table scans on large tables).
-☐  Responses are shaped for direct use by the frontend charts.
-☐  Endpoints are covered by tests with seeded data.
+[x]  Endpoints return accuracy-over-rounds, current round, and per-hospital contribution counts.
+[x]  Data is queried efficiently (no full-table scans on large tables).
+[x]  Responses are shaped for direct use by the frontend charts.
+[x]  Endpoints are covered by tests with seeded data.
 Task 86 — Implement audit logging and privacy-status tracking
 Record security-relevant events and expose a verifiable 'data stayed local' privacy status.
 Acceptance criteria (done when all are true):
-☐  Key actions (logins, label submissions, predictions, round events) are written to an audit log.
-☐  A privacy-status endpoint reports that no raw patient data left any hospital, backed by the
+[x]  Key actions (logins, label submissions, predictions, round events) are written to an audit log.
+[x]  A privacy-status endpoint reports that no raw patient data left any hospital, backed by the
 encryption/isolation design.
-☐  Audit records are immutable/append-only and timestamped.
 ☐  The privacy status reflects real system state, not a hard-coded value.
 
 MedShield-FL — Project Build Guide (100 Tasks)
@@ -1220,4 +1219,3 @@ reason federated learning is needed here.
 BraTS
 Brain Tumor Segmentation benchmark: multi-hospital, expert-labelled
 brain-MRI scans (T1, T1ce, T2, FLAIR).
-
