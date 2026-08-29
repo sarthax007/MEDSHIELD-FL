@@ -24,23 +24,25 @@ def seed():
         db.commit()
         db.refresh(h1)
 
+        from app.core.security import get_password_hash
         print("Seeding users...")
+        hashed_pw = get_password_hash("password123")
         u1 = User(
             hospital_id=h1.id,
             username="admin1",
-            hashed_password="fakehashedpassword",
+            hashed_password=hashed_pw,
             role="admin",
         )
         u2 = User(
             hospital_id=h1.id,
             username="doctor_alice",
-            hashed_password="fakehashedpassword",
+            hashed_password=hashed_pw,
             role="doctor",
         )
         u3 = User(
             hospital_id=h2.id,
             username="operator_bob",
-            hashed_password="fakehashedpassword",
+            hashed_password=hashed_pw,
             role="operator",
         )
         db.add_all([u1, u2, u3])

@@ -990,11 +990,11 @@ Acceptance criteria (done when all are true):
 Task 80 — Implement authentication and authorization
 Add JWT-based auth with roles for admin, doctor, and hospital operator.
 Acceptance criteria (done when all are true):
-☐  Users authenticate and receive a signed JWT; protected endpoints reject requests without a valid
+☑  Users authenticate and receive a signed JWT; protected endpoints reject requests without a valid
 token.
-☐  Roles (admin/doctor/hospital) gate access so each role can only reach permitted endpoints.
-☐  Passwords are stored hashed, never in plaintext.
-☐  Token expiry and refresh behaviour are implemented and tested.
+☑  Roles (admin/doctor/hospital) gate access so each role can only reach permitted endpoints.
+☑  Passwords are stored hashed, never in plaintext.
+☑  Token expiry and refresh behaviour are implemented and tested.
 Task 81 — Implement hospital and training-round endpoints
 Expose endpoints to register hospitals and to read/manage federated training rounds.
 Acceptance criteria (done when all are true):
