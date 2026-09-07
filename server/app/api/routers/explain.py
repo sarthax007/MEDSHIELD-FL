@@ -119,7 +119,8 @@ async def get_explanation(
         # 5. Extract CAM
         import typing
 
-        blocks = typing.cast(torch.nn.Sequential, clf_model.backbone.blocks)
+        backbone = typing.cast(typing.Any, clf_model.backbone)
+        blocks = typing.cast(torch.nn.Sequential, backbone.blocks)
         target_layer = blocks[-1].norm1
 
         cam_extractor = ViTGradCAM(
