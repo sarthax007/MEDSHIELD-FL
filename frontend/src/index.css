@@ -33,3 +33,24 @@
   --radius-md: calc(var(--radius-lg) - 2px);
   --radius-sm: calc(var(--radius-md) - 2px);
 }
+
+@keyframes scanline {
+  0% {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100vh);
+    opacity: 0;
+  }
+}
+
+.animate-scanline {
+  animation: scanline 8s linear infinite;
+}

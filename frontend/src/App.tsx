@@ -1,21 +1,32 @@
-import { Button } from "@/components/ui/button";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { AuthProvider } from "./lib/AuthContext";
+import AppShell from "./layouts/AppShell";
+import ProtectedRoute from "./components/ProtectedRoute";
+import Login from "./pages/Login";
+import Dashboard from "./pages/Dashboard";
+import Admin from "./pages/Admin";
+import DoctorQueue from "./pages/DoctorQueue";
+import Explainability from "./pages/Explainability";
 
-function App() {
+export default function App() {
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
-      <div className="bg-white p-8 rounded-xl shadow-sm text-center max-w-md w-full">
-        <h1 className="text-2xl font-bold text-slate-900 mb-4">
-          MedShield-FL Dashboard
-        </h1>
-        <p className="text-slate-600 mb-8">
-          Welcome to the privacy-preserving federated learning dashboard.
-        </p>
-        <Button onClick={() => alert("Tailwind & shadcn/ui are working!")}>
-          Test Component
-        </Button>
-      </div>
-    </div>
+    <BrowserRouter>
+      <AuthProvider>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+
+          <Route element={<ProtectedRoute />}>
+            <Route path="/" element={<AppShell />}>
+              <Route index element={<Dashboard />} />
+              <Route path="admin" element={<Admin />} />
+              <Route path="doctor" element={<DoctorQueue />} />
+              <Route path="explain" element={<Explainability />} />
+            </Route>
+          </Route>
+
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </AuthProvider>
+    </BrowserRouter>
   );
 }
-
-export default App;
