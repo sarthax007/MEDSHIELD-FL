@@ -8,6 +8,8 @@ import Admin from "./pages/Admin";
 import DoctorQueue from "./pages/DoctorQueue";
 import Explainability from "./pages/Explainability";
 
+import Prediction from "./pages/Prediction";
+
 export default function App() {
   return (
     <BrowserRouter>
@@ -20,6 +22,7 @@ export default function App() {
               <Route index element={<Dashboard />} />
               <Route path="admin" element={<Admin />} />
               <Route path="doctor" element={<DoctorQueue />} />
+              <Route path="predict" element={<Prediction />} />
               <Route path="explain" element={<Explainability />} />
             </Route>
           </Route>

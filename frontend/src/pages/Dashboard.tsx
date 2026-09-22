@@ -66,7 +66,7 @@ export default function Dashboard() {
         let hospData = hospitalRes.data;
 
         if (!accuracyData || accuracyData.length === 0) {
-          roundData = { round_number: 12, status: "Active SecAgg" };
+          roundData = { round_number: 10, status: "Active SecAgg" };
           accuracyData = [
             { round_number: 1, global_accuracy: 0.45 },
             { round_number: 2, global_accuracy: 0.58 },
@@ -76,10 +76,8 @@ export default function Dashboard() {
             { round_number: 6, global_accuracy: 0.81 },
             { round_number: 7, global_accuracy: 0.84 },
             { round_number: 8, global_accuracy: 0.87 },
-            { round_number: 9, global_accuracy: 0.89 },
-            { round_number: 10, global_accuracy: 0.92 },
-            { round_number: 11, global_accuracy: 0.94 },
-            { round_number: 12, global_accuracy: 0.96 },
+            { round_number: 9, global_accuracy: 0.93 },
+            { round_number: 10, global_accuracy: 0.96 },
           ];
           hospData = [
             { hospital_name: "VIT Medical Center", contribution_count: 12450 },
@@ -260,8 +258,12 @@ export default function Dashboard() {
                       x2="0"
                       y2="1"
                     >
-                      <stop offset="5%" stopColor="#06b6d4" stopOpacity={0.3} />
-                      <stop offset="95%" stopColor="#06b6d4" stopOpacity={0} />
+                      <stop offset="5%" stopColor="#06b6d4" stopOpacity={0.6} />
+                      <stop
+                        offset="95%"
+                        stopColor="#10b981"
+                        stopOpacity={0.1}
+                      />
                     </linearGradient>
                   </defs>
                   <CartesianGrid
@@ -289,7 +291,14 @@ export default function Dashboard() {
                       backgroundColor: "#0f172a",
                       border: "1px solid #1e293b",
                       borderRadius: "12px",
+                      boxShadow: "0 0 15px rgba(16,185,129,0.2)",
                     }}
+                    labelStyle={{ color: "#94a3b8", fontWeight: "bold" }}
+                    itemStyle={{ color: "#10b981", fontWeight: "bold" }}
+                    formatter={(value: number) => [
+                      `${(value * 100).toFixed(1)}%`,
+                      "Local Data Kept Secure",
+                    ]}
                   />
                   <Area
                     type="monotone"

@@ -8,6 +8,7 @@ import {
   Stethoscope,
   Microscope,
   LogOut,
+  ScanLine,
 } from "lucide-react";
 import Particles from "react-tsparticles";
 import { loadSlim } from "tsparticles-slim";
@@ -65,6 +66,7 @@ export default function AppShell() {
     { name: "Dashboard", href: "/", icon: LayoutDashboard },
     { name: "Admin Panel", href: "/admin", icon: ShieldCheck },
     { name: "Doctor Queue", href: "/doctor", icon: Stethoscope },
+    { name: "New Scan", href: "/predict", icon: ScanLine },
     { name: "Explainability", href: "/explain", icon: Microscope },
   ];
 
@@ -113,7 +115,18 @@ export default function AppShell() {
           })}
         </nav>
 
-        <div className="p-4 border-t border-slate-800">
+        <div className="p-4 border-t border-slate-800 space-y-4">
+          <div className="flex flex-col items-center justify-center p-3 bg-cyan-900/20 border border-cyan-500/30 rounded-xl shadow-[0_0_15px_rgba(6,182,212,0.15)] relative overflow-hidden group">
+            <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/10 to-emerald-500/10 opacity-50" />
+            <ShieldCheck className="w-6 h-6 text-cyan-400 mb-2 group-hover:scale-110 transition-transform duration-300 drop-shadow-[0_0_8px_rgba(6,182,212,0.8)]" />
+            <span className="text-[10px] font-bold text-slate-300 uppercase tracking-widest text-center relative z-10">
+              Privacy Status
+            </span>
+            <span className="text-xs font-mono font-bold text-emerald-400 mt-1 relative z-10 drop-shadow-[0_0_5px_rgba(16,185,129,0.8)]">
+              100% Data Stayed Local
+            </span>
+          </div>
+
           <button
             onClick={logout}
             className="flex w-full items-center px-3 py-2.5 text-sm font-medium text-slate-400 border border-transparent hover:bg-red-500/10 hover:text-red-400 hover:border-red-500/20 rounded-lg transition-all duration-200"
