@@ -17,6 +17,8 @@ import IndiaGeospatialMap, {
 import {
   AreaChart,
   Area,
+  BarChart,
+  Bar,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -39,6 +41,26 @@ interface HospitalParticipation {
   contribution_count: number;
 }
 
+const MOCK_ROUND_DATA = { round_number: 10, status: "Active SecAgg" };
+const MOCK_ACCURACY_DATA = [
+  { round_number: 1, global_accuracy: 0.45 },
+  { round_number: 2, global_accuracy: 0.58 },
+  { round_number: 3, global_accuracy: 0.65 },
+  { round_number: 4, global_accuracy: 0.72 },
+  { round_number: 5, global_accuracy: 0.78 },
+  { round_number: 6, global_accuracy: 0.81 },
+  { round_number: 7, global_accuracy: 0.84 },
+  { round_number: 8, global_accuracy: 0.87 },
+  { round_number: 9, global_accuracy: 0.93 },
+  { round_number: 10, global_accuracy: 0.96 },
+];
+const MOCK_HOSP_DATA = [
+  { hospital_name: "VIT Medical Center", contribution_count: 12450 },
+  { hospital_name: "Pune City Hospital", contribution_count: 8200 },
+  { hospital_name: "Nanded General", contribution_count: 5400 },
+  { hospital_name: "Mumbai Care Institute", contribution_count: 15600 },
+];
+
 export default function Dashboard() {
   const [currentRound, setCurrentRound] = useState<CurrentRound | null>(null);
   const [accuracyTrend, setAccuracyTrend] = useState<AccuracyTrend[]>([]);
@@ -53,7 +75,6 @@ export default function Dashboard() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        setLoading(true);
         const [roundRes, accuracyRes, hospitalRes] = await Promise.all([
           apiClient.get("/metrics/current-round"),
           apiClient.get("/metrics/accuracy-trend"),
@@ -66,28 +87,9 @@ export default function Dashboard() {
         let hospData = hospitalRes.data;
 
         if (!accuracyData || accuracyData.length === 0) {
-          roundData = { round_number: 10, status: "Active SecAgg" };
-          accuracyData = [
-            { round_number: 1, global_accuracy: 0.45 },
-            { round_number: 2, global_accuracy: 0.58 },
-            { round_number: 3, global_accuracy: 0.65 },
-            { round_number: 4, global_accuracy: 0.72 },
-            { round_number: 5, global_accuracy: 0.78 },
-            { round_number: 6, global_accuracy: 0.81 },
-            { round_number: 7, global_accuracy: 0.84 },
-            { round_number: 8, global_accuracy: 0.87 },
-            { round_number: 9, global_accuracy: 0.93 },
-            { round_number: 10, global_accuracy: 0.96 },
-          ];
-          hospData = [
-            { hospital_name: "VIT Medical Center", contribution_count: 12450 },
-            { hospital_name: "Pune City Hospital", contribution_count: 8200 },
-            { hospital_name: "Nanded General", contribution_count: 5400 },
-            {
-              hospital_name: "Mumbai Care Institute",
-              contribution_count: 15600,
-            },
-          ];
+          roundData = MOCK_ROUND_DATA;
+          accuracyData = MOCK_ACCURACY_DATA;
+          hospData = MOCK_HOSP_DATA;
         }
 
         setCurrentRound(roundData);
@@ -329,6 +331,75 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
+
+      {/* Hospital Participation Chart */}
+      <div className="backdrop-blur-2xl bg-slate-900/60 border border-purple-500/20 shadow-[inset_0_0_20px_rgba(168,85,247,0.1)] rounded-2xl p-6 relative overflow-hidden group mb-6">
+        <h3 className="text-lg font-semibold text-white mb-6 flex items-center gap-2 relative z-20">
+          <Database className="w-5 h-5 text-purple-400" />
+          Node Data Contribution Telemetry
+        </h3>
+        <div className="flex-1 h-[250px] w-full relative z-20">
+          {hospitalData.length > 0 ? (
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart
+                data={hospitalData}
+                margin={{ top: 10, right: 10, left: 10, bottom: 20 }}
+              >
+                <defs>
+                  <linearGradient id="colorBar" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#c084fc" stopOpacity={0.8} />
+                    <stop offset="95%" stopColor="#2dd4bf" stopOpacity={0.8} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                  stroke="#334155"
+                  vertical={false}
+                  opacity={0.2}
+                />
+                <XAxis
+                  dataKey="hospital_name"
+                  stroke="#64748b"
+                  tick={{ fill: "#64748b", fontSize: 12 }}
+                  tickLine={false}
+                  axisLine={false}
+                />
+                <YAxis
+                  stroke="#64748b"
+                  tick={{ fill: "#64748b", fontSize: 12 }}
+                  tickLine={false}
+                  axisLine={false}
+                />
+                <Tooltip
+                  cursor={{ fill: "#1e293b", opacity: 0.4 }}
+                  contentStyle={{
+                    backgroundColor: "#0f172a",
+                    border: "1px solid #1e293b",
+                    borderRadius: "12px",
+                    boxShadow: "0 0 15px rgba(168,85,247,0.2)",
+                  }}
+                  labelStyle={{ color: "#94a3b8", fontWeight: "bold" }}
+                  itemStyle={{ color: "#c084fc", fontWeight: "bold" }}
+                  formatter={(value: number) => [
+                    value.toLocaleString(),
+                    "Datapoints Contributed",
+                  ]}
+                />
+                <Bar
+                  dataKey="contribution_count"
+                  fill="url(#colorBar)"
+                  radius={[4, 4, 0, 0]}
+                />
+              </BarChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="absolute inset-0 flex items-center justify-center text-slate-500 text-sm">
+              Awaiting node connection...
+            </div>
+          )}
+        </div>
+      </div>
+
       {/* --- MODALS --- */}
 
       {/* 1. Full Screen Map Modal */}
