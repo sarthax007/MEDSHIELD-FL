@@ -9,6 +9,7 @@ import {
   Microscope,
   LogOut,
   ScanLine,
+  Hexagon,
 } from "lucide-react";
 import Particles from "react-tsparticles";
 import { loadSlim } from "tsparticles-slim";
@@ -68,6 +69,7 @@ export default function AppShell() {
     { name: "Doctor Queue", href: "/doctor", icon: Stethoscope },
     { name: "New Scan", href: "/predict", icon: ScanLine },
     { name: "Explainability", href: "/explain", icon: Microscope },
+    { name: "3D Volumetric", href: "/viewer3d", icon: Hexagon },
   ];
 
   return (

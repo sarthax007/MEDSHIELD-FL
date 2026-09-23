@@ -7,6 +7,7 @@ import Dashboard from "./pages/Dashboard";
 import Admin from "./pages/Admin";
 import DoctorQueue from "./pages/DoctorQueue";
 import Explainability from "./pages/Explainability";
+import VolumetricViewer from "./pages/VolumetricViewer"; // Refresh TS Server
 
 import Prediction from "./pages/Prediction";
 
@@ -24,6 +25,7 @@ export default function App() {
               <Route path="doctor" element={<DoctorQueue />} />
               <Route path="predict" element={<Prediction />} />
               <Route path="explain" element={<Explainability />} />
+              <Route path="viewer3d" element={<VolumetricViewer />} />
             </Route>
           </Route>
 

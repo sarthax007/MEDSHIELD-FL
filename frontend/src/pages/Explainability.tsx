@@ -12,7 +12,13 @@ import {
 
 export default function Explainability() {
   const location = useLocation();
-  const imageUrl = location.state?.imageUrl;
+  const [imageUrl, setImageUrl] = React.useState<string | null>(() => {
+    if (location.state?.imageUrl) {
+      sessionStorage.setItem("prediction_previewUrl", location.state.imageUrl);
+      return location.state.imageUrl;
+    }
+    return sessionStorage.getItem("prediction_previewUrl");
+  });
 
   return (
     <div className="max-w-6xl mx-auto space-y-6 pb-20">

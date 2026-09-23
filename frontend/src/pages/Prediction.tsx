@@ -9,17 +9,36 @@ import {
   CheckCircle,
   AlertTriangle,
   ScanLine,
+  Hexagon,
 } from "lucide-react";
 
 export default function Prediction() {
   const [dragActive, setDragActive] = useState(false);
-  const [file, setFile] = useState<File | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [, setFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(() =>
+    sessionStorage.getItem("prediction_previewUrl"),
+  );
 
   const [status, setStatus] = useState<
     "idle" | "uploading" | "analyzing" | "result"
-  >("idle");
+  >(() => (sessionStorage.getItem("prediction_status") as any) || "idle");
   const inputRef = useRef<HTMLInputElement>(null);
+
+  const updateStatus = (
+    newStatus: "idle" | "uploading" | "analyzing" | "result",
+  ) => {
+    setStatus(newStatus);
+    sessionStorage.setItem("prediction_status", newStatus);
+  };
+
+  const updatePreviewUrl = (url: string | null) => {
+    setPreviewUrl(url);
+    if (url) {
+      sessionStorage.setItem("prediction_previewUrl", url);
+    } else {
+      sessionStorage.removeItem("prediction_previewUrl");
+    }
+  };
 
   // Handle drag events
   const handleDrag = function (e: React.DragEvent) {
@@ -57,10 +76,10 @@ export default function Prediction() {
     // If it's a medical file (like .nii.gz or .npy), use a placeholder for the UI animation.
     if (selectedFile.type.startsWith("image/")) {
       const objectUrl = URL.createObjectURL(selectedFile);
-      setPreviewUrl(objectUrl);
+      updatePreviewUrl(objectUrl);
     } else {
       // Fallback placeholder for .nii.gz, .npy, etc.
-      setPreviewUrl(
+      updatePreviewUrl(
         "https://images.unsplash.com/photo-1559757175-5700dde675bc?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
       );
     }
@@ -70,15 +89,15 @@ export default function Prediction() {
   };
 
   const startAnalysisSequence = () => {
-    setStatus("uploading");
+    updateStatus("uploading");
 
     // Simulate secure transfer delay
     setTimeout(() => {
-      setStatus("analyzing");
+      updateStatus("analyzing");
 
       // Simulate heavy AI inference delay
       setTimeout(() => {
-        setStatus("result");
+        updateStatus("result");
       }, 3500);
     }, 1500);
   };
@@ -309,7 +328,7 @@ export default function Prediction() {
             </div>
 
             {/* CTA to Explainability */}
-            <div className="mt-auto">
+            <div className="mt-auto space-y-4">
               <Link
                 to="/explain"
                 state={{ imageUrl: previewUrl }}
@@ -317,7 +336,19 @@ export default function Prediction() {
               >
                 <div className="flex items-center gap-3">
                   <Brain className="w-5 h-5 group-hover:scale-110 transition-transform text-cyan-400" />
-                  <span>View Explainability Report</span>
+                  <span>View 2D Explainability</span>
+                </div>
+                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              </Link>
+
+              <Link
+                to="/viewer3d"
+                state={{ imageUrl: previewUrl }}
+                className="w-full relative overflow-hidden rounded-xl font-bold text-sm tracking-wide py-4 px-5 flex items-center justify-between transition-all duration-300 bg-purple-900/40 hover:bg-purple-800/60 text-purple-300 border border-purple-500/50 hover:border-purple-400 shadow-[0_0_20px_rgba(168,85,247,0.2)] hover:shadow-[0_0_30px_rgba(168,85,247,0.4)] group"
+              >
+                <div className="flex items-center gap-3">
+                  <Hexagon className="w-5 h-5 group-hover:scale-110 transition-transform text-purple-400" />
+                  <span>View 3D Volumetric</span>
                 </div>
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </Link>
@@ -325,13 +356,13 @@ export default function Prediction() {
 
             <button
               onClick={() => {
-                setStatus("idle");
+                updateStatus("idle");
+                updatePreviewUrl(null);
                 setFile(null);
-                setPreviewUrl(null);
               }}
               className="mt-6 text-xs text-slate-500 hover:text-slate-300 transition-colors uppercase tracking-widest font-bold"
             >
-              Start New Analysis
+              Click to New Scan
             </button>
           </div>
         </div>
