@@ -1,61 +1,82 @@
 import os
-import json
+import sys
 from typing import Optional
-from sqlalchemy import create_engine, Column, Integer, Float, String, LargeBinary
-from sqlalchemy.orm import declarative_base, sessionmaker
 
-Base = declarative_base()
+sys.path.insert(
+    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "server"))
+)
+from app.db.session import SessionLocal
+from app.db import models
 
-class RoundMetric(Base):
-    __tablename__ = 'round_metrics'
-    
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    round_number = Column(Integer, index=True)
-    accuracy = Column(Float, nullable=True)
-    loss = Column(Float, nullable=True)
-    participating_clients = Column(String, nullable=True)  # JSON string
-
-class GlobalModel(Base):
-    __tablename__ = 'global_models'
-    
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    round_number = Column(Integer, unique=True, index=True)
-    model_weights = Column(LargeBinary, nullable=False)
-
-db_url = os.getenv("DATABASE_URL_SYNC", "sqlite:///./fl_metrics.db")
-engine = create_engine(db_url, connect_args={"check_same_thread": False} if "sqlite" in db_url else {})
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
-Base.metadata.create_all(bind=engine)
 
 def save_metrics(round_number: int, accuracy: float, loss: float, clients: list):
     session = SessionLocal()
     try:
-        clients_json = json.dumps(clients)
-        metric = RoundMetric(
-            round_number=round_number, 
-            accuracy=accuracy, 
-            loss=loss, 
-            participating_clients=clients_json
+        r = (
+            session.query(models.TrainingRound)
+            .filter_by(round_number=round_number)
+            .first()
         )
-        session.add(metric)
+        if r:
+            r.global_accuracy = accuracy
+            r.status = "Completed"
+        else:
+            r = models.TrainingRound(
+                round_number=round_number, global_accuracy=accuracy, status="Completed"
+            )
+            session.add(r)
         session.commit()
     finally:
         session.close()
+
 
 def save_global_model(round_number: int, model_weights: bytes):
     session = SessionLocal()
     try:
-        model = GlobalModel(round_number=round_number, model_weights=model_weights)
-        session.add(model)
+        r = (
+            session.query(models.TrainingRound)
+            .filter_by(round_number=round_number)
+            .first()
+        )
+        if not r:
+            r = models.TrainingRound(round_number=round_number, status="Completed")
+            session.add(r)
+            session.commit()
+            session.refresh(r)
+
+        # We save weights to disk and path to DB because ModelVersion expects s3_path
+        os.makedirs("data/models", exist_ok=True)
+        path = f"data/models/round_{round_number}.bin"
+        with open(path, "wb") as f:
+            f.write(model_weights)
+
+        mv = models.ModelVersion(
+            version_tag=f"v{round_number}.0", training_round_id=r.id, s3_path=path
+        )
+        session.add(mv)
         session.commit()
     finally:
         session.close()
 
+
 def load_global_model(round_number: int) -> Optional[bytes]:
     session = SessionLocal()
     try:
-        model = session.query(GlobalModel).filter_by(round_number=round_number).first()
-        return model.model_weights if model else None  # type: ignore
+        r = (
+            session.query(models.TrainingRound)
+            .filter_by(round_number=round_number)
+            .first()
+        )
+        if not r:
+            return None
+        mv = (
+            session.query(models.ModelVersion).filter_by(training_round_id=r.id).first()
+        )
+        if not mv:
+            return None
+        if os.path.exists(mv.s3_path):
+            with open(mv.s3_path, "rb") as f:
+                return f.read()
+        return None
     finally:
         session.close()

@@ -9,13 +9,7 @@ import {
 } from "react";
 import { useLocation, Link } from "react-router-dom";
 import { Canvas, useFrame } from "@react-three/fiber";
-import {
-  OrbitControls,
-  Html,
-  Center,
-  Bounds,
-  useGLTF,
-} from "@react-three/drei";
+import { OrbitControls, Html, Center, useGLTF } from "@react-three/drei";
 import {
   ArrowLeft,
   Hexagon,
